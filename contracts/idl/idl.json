@@ -1,0 +1,317 @@
+{
+    "version": "0.1.0",
+    "name": "document_storage",
+    "instructions": [
+        {
+            "name": "sendDocument",
+            "accounts": [
+                {
+                    "name": "document",
+                    "isMut": true,
+                    "isSigner": true
+                },
+                {
+                    "name": "user",
+                    "isMut": true,
+                    "isSigner": true
+                },
+                {
+                    "name": "documentCounter",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "systemProgram",
+                    "isMut": false,
+                    "isSigner": false
+                }
+            ],
+            "args": [
+                {
+                    "name": "imageHash",
+                    "type": "string"
+                },
+                {
+                    "name": "uploader",
+                    "type": "publicKey"
+                },
+                {
+                    "name": "signers",
+                    "type": {
+                        "vec": "publicKey"
+                    }
+                },
+                {
+                    "name": "date",
+                    "type": "i64"
+                }
+            ]
+        },
+        {
+            "name": "addSignedDocument",
+            "accounts": [
+                {
+                    "name": "signedDocument",
+                    "isMut": true,
+                    "isSigner": true
+                },
+                {
+                    "name": "user",
+                    "isMut": true,
+                    "isSigner": true
+                },
+                {
+                    "name": "systemProgram",
+                    "isMut": false,
+                    "isSigner": false
+                }
+            ],
+            "args": [
+                {
+                    "name": "docId",
+                    "type": "u64"
+                },
+                {
+                    "name": "signature",
+                    "type": "publicKey"
+                }
+            ]
+        },
+        {
+            "name": "addUserPhoto",
+            "accounts": [
+                {
+                    "name": "userPhoto",
+                    "isMut": true,
+                    "isSigner": true
+                },
+                {
+                    "name": "user",
+                    "isMut": true,
+                    "isSigner": true
+                },
+                {
+                    "name": "systemProgram",
+                    "isMut": false,
+                    "isSigner": false
+                }
+            ],
+            "args": [
+                {
+                    "name": "imageHash",
+                    "type": "string"
+                },
+                {
+                    "name": "user",
+                    "type": "publicKey"
+                }
+            ]
+        },
+        {
+            "name": "getAllDocuments",
+            "accounts": [
+                {
+                    "name": "documents",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "documentCounter",
+                    "isMut": false,
+                    "isSigner": false
+                }
+            ],
+            "args": [],
+            "returns": {
+                "vec": {
+                    "defined": "DocumentInfo"
+                }
+            }
+        },
+        {
+            "name": "getAllSignedDocuments",
+            "accounts": [
+                {
+                    "name": "signedDocuments",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "user",
+                    "isMut": false,
+                    "isSigner": true
+                }
+            ],
+            "args": [],
+            "returns": {
+                "vec": {
+                    "defined": "SignedDocumentInfo"
+                }
+            }
+        },
+        {
+            "name": "getAllUserPhotos",
+            "accounts": [
+                {
+                    "name": "userPhotos",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "user",
+                    "isMut": false,
+                    "isSigner": true
+                }
+            ],
+            "args": [],
+            "returns": {
+                "vec": {
+                    "defined": "UserPhotoInfo"
+                }
+            }
+        }
+    ],
+    "accounts": [
+        {
+            "name": "Document",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "id",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "imageHash",
+                        "type": "string"
+                    },
+                    {
+                        "name": "uploader",
+                        "type": "publicKey"
+                    },
+                    {
+                        "name": "signers",
+                        "type": {
+                            "vec": "publicKey"
+                        }
+                    },
+                    {
+                        "name": "date",
+                        "type": "i64"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "SignedDocument",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "docId",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "signedBy",
+                        "type": "publicKey"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "UserPhoto",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "imageHash",
+                        "type": "string"
+                    },
+                    {
+                        "name": "user",
+                        "type": "publicKey"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "DocumentCounter",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "count",
+                        "type": "u64"
+                    }
+                ]
+            }
+        }
+    ],
+    "types": [
+        {
+            "name": "DocumentInfo",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "id",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "imageHash",
+                        "type": "string"
+                    },
+                    {
+                        "name": "uploader",
+                        "type": "publicKey"
+                    },
+                    {
+                        "name": "signers",
+                        "type": {
+                            "array": [
+                                "publicKey",
+                                10
+                            ]
+                        }
+                    },
+                    {
+                        "name": "date",
+                        "type": "i64"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "SignedDocumentInfo",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "docId",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "signedBy",
+                        "type": "publicKey"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "UserPhotoInfo",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "imageHash",
+                        "type": "string"
+                    },
+                    {
+                        "name": "user",
+                        "type": "publicKey"
+                    }
+                ]
+            }
+        }
+    ]
+}
