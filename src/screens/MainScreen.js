@@ -1,29 +1,29 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {ScrollView, StyleSheet, Text, View, Image, Button} from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
+import {Modal, Portal, Button, TextInput, IconButton} from 'react-native-paper';
 import {launchImageLibrary} from 'react-native-image-picker';
 import axios from 'axios';
+import LinearGradient from 'react-native-linear-gradient';
 
-import {Section} from '../components/Section';
+import {useAuthorization} from '../components/providers/AuthorizationProvider';
+import {useConnection} from '../components/providers/ConnectionProvider';
 import ConnectButton from '../components/ConnectButton';
 import AccountInfo from '../components/AccountInfo';
-import {
-  useAuthorization,
-  Account,
-} from '../components/providers/AuthorizationProvider';
-import {useConnection} from '../components/providers/ConnectionProvider';
-import DisconnectButton from '../components/DisconnectButton';
-import RequestAirdropButton from '../components/RequestAirdropButton';
-import SignMessageButton from '../components/SignMessageButton';
-import SignTransactionButton from '../components/SignTransactionButton';
 import {Header} from '../components/Header';
-import LinearGradient from 'react-native-linear-gradient';
-import Upload from '../components/Upload';
+import UploadModal from '../components/UploadModal';
 
 export default function MainScreen() {
   const {connection} = useConnection();
   const {selectedAccount} = useAuthorization();
   const [balance, setBalance] = useState(0);
-  const [imageUri, setImageUri] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const fetchAndUpdateBalance = useCallback(
     async account => {
@@ -42,38 +42,12 @@ export default function MainScreen() {
     fetchAndUpdateBalance(selectedAccount);
   }, [fetchAndUpdateBalance, selectedAccount]);
 
-  const selectImage = () => {
-    launchImageLibrary({mediaType: 'photo'}, response => {
-      if (response.assets && response.assets.length > 0) {
-        setImageUri(response.assets[0].uri);
-      }
-    });
-  };
+  const showModal = () => setModalVisible(true);
+  const hideModal = () => setModalVisible(false);
 
-  const uploadImage = async () => {
-    if (!imageUri) return;
-
-    const formData = new FormData();
-    formData.append('file', {
-      uri: imageUri,
-      name: 'photo.jpg',
-      type: 'image/jpeg',
-    });
-
-    try {
-      const response = await axios.post(
-        'https://dedox-backend.onrender.com/upload',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      );
-      console.log('Image uploaded successfully:', response.data);
-    } catch (error) {
-      console.error('Error uploading image:', error);
-    }
+  const handleUploadSuccess = () => {
+    // Implement any logic needed after successful upload
+    console.log('Upload completed successfully');
   };
 
   return (
@@ -85,33 +59,35 @@ export default function MainScreen() {
           {!selectedAccount && (
             <>
               <Header />
-              <View className="h-2/3 items-center justify-center">
+              <View style={styles.connectButtonContainer}>
                 <ConnectButton title="Connect wallet" />
               </View>
             </>
           )}
-          {selectedAccount ? (
-            <>
-              <AccountInfo
-                selectedAccount={selectedAccount}
-                balance={balance}
-                fetchAndUpdateBalance={fetchAndUpdateBalance}
-              />
-              {/* <Button title="Select Image" onPress={selectImage} />
-              {imageUri && (
-                <View>
-                  <Image source={{uri: imageUri}} style={styles.imagePreview} />
-                  <Button title="Upload Image" onPress={uploadImage} />
-                </View>
-              )} */}
-            </>
-          ) : null}
+          {selectedAccount && (
+            <AccountInfo
+              selectedAccount={selectedAccount}
+              balance={balance}
+              fetchAndUpdateBalance={fetchAndUpdateBalance}
+            />
+          )}
         </ScrollView>
-        {selectedAccount ? (
-          <Upload />
-        ) : (
-          <Text>Please connect your account...</Text>
+        {selectedAccount && (
+          <TouchableOpacity
+            activeOpacity={0.5}
+            style={styles.floatingButton}
+            onPress={showModal}>
+            <IconButton icon="plus" size={25} iconColor="#fff" />
+          </TouchableOpacity>
         )}
+        <UploadModal
+          visible={modalVisible}
+          hideModal={hideModal}
+          onUpload={handleUploadSuccess}
+          userWalletAddress={
+            selectedAccount ? selectedAccount.publicKey.toBase58() : ''
+          }
+        />
       </View>
     </LinearGradient>
   );
@@ -124,15 +100,44 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContainer: {
-    height: '100%',
+    flexGrow: 1,
+  },
+  connectButtonContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  floatingButton: {
+    position: 'absolute',
+    bottom: 16,
+    right: 16,
+    borderWidth: 1,
+    borderColor: 'white',
+    borderRadius: 30,
+    padding: 8,
+  },
+  modalContainer: {
+    backgroundColor: 'white',
+    padding: 20,
+    margin: 20,
+    borderRadius: 10,
   },
   imagePreview: {
-    width: 200,
+    width: '100%',
     height: 200,
+    resizeMode: 'contain',
     marginVertical: 16,
   },
-  buttonGroup: {
-    flexDirection: 'column',
-    paddingVertical: 4,
+  button: {
+    marginVertical: 8,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  input: {
+    flex: 1,
+    marginRight: 8,
   },
 });

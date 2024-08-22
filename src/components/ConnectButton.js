@@ -31,7 +31,7 @@ export default function ConnectButton(props) {
       {...props}
       disabled={authorizationInProgress}
       onPress={handleConnectPress}
-      className="border-white border h-20 w-3/4 self-center rounded-full items-center justify-center -mt-10"
+      className="border-white border h-20 w-3/4 self-center rounded-full items-center justify-center -mt-20"
       activeOpacity={0.5}>
       <Text className="text-white text-xl font-semibold">Connect Wallet</Text>
     </TouchableOpacity>

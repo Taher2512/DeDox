@@ -18,8 +18,9 @@ const theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: 'tomato',
+    primary: '#0e1111',
     secondary: 'yellow',
+    tertiary: '#fff',
   },
 };
 
