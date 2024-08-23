@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("9wjuwLCf2RB6bLFGcA9gtfu2PwaVytx1TyQR6bKYwxM8");
+declare_id!("2ooqk3QB9KVqcwKE8EnxDNoUnTAMfTH43qmqtMA1T1zk");
 
 #[program]
 pub mod document_storage {
@@ -9,21 +9,18 @@ pub mod document_storage {
     // ... (previous functions remain the same)
    pub fn send_document(
         ctx: Context<SendDocument>,
+        id: u64,  // Now accepting id from client
         image_hash: String,
         uploader: Pubkey,
         signers: Vec<Pubkey>,
         date: i64,
     ) -> Result<()> {
         let document = &mut ctx.accounts.document;
-        document.id = ctx.accounts.document_counter.count;
+        document.id = id;  // Use the provided id
         document.image_hash = image_hash;
         document.uploader = uploader;
         document.signers = signers;
         document.date = date;
-
-        // Increment the document counter
-        let counter = &mut ctx.accounts.document_counter;
-        counter.count += 1;
 
         Ok(())
     }
@@ -86,7 +83,6 @@ pub mod document_storage {
 #[derive(Accounts)]
 pub struct GetAllDocuments<'info> {
     pub documents: Account<'info, Document>,
-    pub document_counter: Account<'info, DocumentCounter>,
 }
 
 #[derive(Accounts)]
@@ -108,8 +104,6 @@ pub struct SendDocument<'info> {
     pub document: Account<'info, Document>,
     #[account(mut)]
     pub user: Signer<'info>,
-    #[account(mut)]
-    pub document_counter: Account<'info, DocumentCounter>,
     pub system_program: Program<'info, System>,
 }
 
@@ -152,10 +146,7 @@ pub struct UserPhoto {
     pub user: Pubkey,
 }
 
-#[account]
-pub struct DocumentCounter {
-    pub count: u64,
-}
+
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Default)]
 pub struct DocumentInfo {

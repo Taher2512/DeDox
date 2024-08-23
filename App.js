@@ -1,3 +1,4 @@
+/*eslint-disable*/
 import {
   ConnectionProvider,
   RPC_ENDPOINT,
@@ -9,18 +10,15 @@ import {AuthorizationProvider} from './src/components/providers/AuthorizationPro
 import {Header} from './src/components/Header';
 
 import MainScreen from './src/screens/MainScreen';
+import { WalletContextProvider } from './src/hooks/WalletContextProvider';
 
 export default function App() {
   return (
-    <ConnectionProvider
-      config={{commitment: 'processed'}}
-      endpoint={clusterApiUrl(RPC_ENDPOINT)}>
-      <AuthorizationProvider>
+    <WalletContextProvider>
         <SafeAreaView style={styles.shell}>
           <MainScreen />
         </SafeAreaView>
-      </AuthorizationProvider>
-    </ConnectionProvider>
+        </WalletContextProvider>
   );
 }
 

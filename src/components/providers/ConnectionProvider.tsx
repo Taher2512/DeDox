@@ -1,3 +1,4 @@
+/*eslint-disable*/
 import {Connection, type ConnectionConfig} from '@solana/web3.js';
 import React, {
   type FC,
