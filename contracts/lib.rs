@@ -35,17 +35,16 @@ pub mod document_storage {
 
         Ok(())
     }
-    pub fn add_user_photo(
-        ctx: Context<AddUserPhoto>,
-        image_hash: String,
-        user: Pubkey,
-    ) -> Result<()> {
-        let user_photo = &mut ctx.accounts.user_photo;
-        user_photo.image_hash = image_hash;
-        user_photo.user = user;
+   pub fn add_user_photo(
+    ctx: Context<AddUserPhoto>,
+    image_hash: String,
+) -> Result<()> {
+    let user_photo = &mut ctx.accounts.user_photo;
+    user_photo.image_hash = image_hash;
+    user_photo.user = ctx.accounts.user.key();
 
-        Ok(())
-    }
+    Ok(())
+}
     pub fn get_all_documents(ctx: Context<GetAllDocuments>) -> Result<Vec<DocumentInfo>> {
         let documents = &ctx.accounts.documents;
         let document_info = DocumentInfo {
@@ -118,7 +117,13 @@ pub struct AddSignedDocument<'info> {
 
 #[derive(Accounts)]
 pub struct AddUserPhoto<'info> {
-    #[account(init, payer = user, space = 8 + 32)]
+    #[account(
+        init,
+        payer = user,
+        space = 8 + 4 + 256 + 32, // discriminator + string length + max string size + pubkey
+        seeds = [b"user_photo", user.key().as_ref()],
+        bump
+    )]
     pub user_photo: Account<'info, UserPhoto>,
     #[account(mut)]
     pub user: Signer<'info>,

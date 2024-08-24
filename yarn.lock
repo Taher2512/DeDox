@@ -2467,7 +2467,7 @@
     "@solana/wallet-adapter-base" "^0.9.20"
     "@solana/wallet-adapter-react" "^0.15.28"
     "@solana/web3.js" "^1.48.0"
-    DeDox "file:../AppData/Local/Yarn/Cache/v6/npm-e-ox-0.0.1-5f815804-07b7-4e70-8a05-247bb568752f-1724409799032/node_modules/DeDox"
+    DeDox "file:../AppData/Local/Yarn/Cache/v6/npm-e-ox-0.0.1-f286ca52-a2f6-4662-87fd-75d7ab929cab-1724437608005/node_modules/DeDox"
     assert "^2.0.0"
     axios "^1.7.4"
     bs58 "^5.0.0"
@@ -2480,6 +2480,7 @@
     react-native-linear-gradient "^2.8.3"
     react-native-paper "^5.12.5"
     react-native-safe-area-context "^4.10.9"
+    react-native-url-polyfill "^1.3.0"
     react-native-vector-icons "^10.1.0"
     text-encoding "^0.7.0"
 
@@ -2879,6 +2880,11 @@ base-x@^4.0.0:
   version "4.0.0"
   resolved "https://registry.npmjs.org/base-x/-/base-x-4.0.0.tgz"
   integrity sha512-FuwxlW4H5kh37X/oW59pwTzzTKRzfrrQwhmyspRM7swOEZcHtDZSCt45U6oKgtuFE+WYPblePMVIPR4RZrh/hw==
+
+base-x@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/base-x/-/base-x-5.0.0.tgz#6d835ceae379130e1a4cb846a70ac4746f28ea9b"
+  integrity sha512-sMW3VGSX1QWVFA6l8U62MLKz29rRfpTlYdCqLdpLo1/Yd4zZwSbnUaDfciIAowAqvq7YFnWq9hrhdg1KYgc1lQ==
 
 base64-js@^1.3.1, base64-js@^1.5.1:
   version "1.5.1"

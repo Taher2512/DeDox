@@ -66,7 +66,7 @@ const useContextProvider = createContext({
 export const WalletContextProvider = ({children}) => {
   const [deepLink, setDeepLink] = useState("");
   const [logs, setLogs] = useState([]);
-  const connection = new Connection(NETWORK);
+  const connection = new Connection('https://devnet.helius-rpc.com/?api-key=e9bbe608-da76-49e8-a3bc-48d03381b6b3',"confirmed");
   const addLog = useCallback((log) => setLogs((logs) => [...logs, "> " + log]), []);
   const scrollViewRef = useRef(null);
   
@@ -96,38 +96,58 @@ export const WalletContextProvider = ({children}) => {
 
   // handle inbound links
   useEffect(() => {
-    if (!deepLink) return;
-
-    const url = new URL(deepLink);
+    if (!deepLink) {
+      return;
+    };
+    const handleDeepLink = ({url}) => {
+      setDeepLink(url);
+    };
+  
+    // Handle the initial URL that opened the app
+    Linking.getInitialURL().then(url => {
+      if (url) {
+        setDeepLink(url);
+      }
+    });
+  
+    // Listen for new URLs
+    const subscription = Linking.addEventListener('url', handleDeepLink);
+  
+   
+    console.log("deepLink",deepLink)
+    const url = new URL(deepLink.replace("myapp://", "https://phantom.app/ul/v1/"));
     const params = url.searchParams;
-
+    console.log("params",params)
     if (params.get("errorCode")) {
       addLog(JSON.stringify(Object.fromEntries([...params]), null, 2));
+      console.log("Error", params.get("errorCode"));
       return;
     }
 
     if (/onConnect/.test(url.pathname)) {
+      console.log("onConnect",params.get("phantom_encryption_public_key"))
       const sharedSecretDapp = nacl.box.before(
         bs58.decode(params.get("phantom_encryption_public_key")),
         dappKeyPair.secretKey
       );
-
+      console.log("sharedSecretDapp", sharedSecretDapp);
       const connectData = decryptPayload(
         params.get("data"),
         params.get("nonce"),
         sharedSecretDapp
       );
-
+       
       setSharedSecret(sharedSecretDapp);
       setSession(connectData.session);
-      cons
+      console.log("data",connectData)
       setPhantomWalletPublicKey(new PublicKey(connectData.public_key));
-
+      console.log("public key",connectData.public_key)
       addLog(JSON.stringify(connectData, null, 2));
     } else if (/onDisconnect/.test(url.pathname)) {
       setPhantomWalletPublicKey(null);
       addLog("Disconnected!");
     } else if (/onSignAndSendTransaction/.test(url.pathname)) {
+      console.log("onSignAndSendTransaction",params.get("data"))
       const signAndSendTransactionData = decryptPayload(
         params.get("data"),
         params.get("nonce"),
@@ -166,6 +186,10 @@ export const WalletContextProvider = ({children}) => {
 
       addLog(JSON.stringify(signMessageData, null, 2));
     }
+    return () => {
+      // Clean up the event listener
+      subscription.remove();
+    };
   }, [deepLink]);
 
   const createTransferTransaction = async () => {
@@ -193,6 +217,7 @@ export const WalletContextProvider = ({children}) => {
     });
 
     const url = buildUrl("connect", params);
+    console.log("url",url)
     Linking.openURL(url);
   };
 
@@ -236,9 +261,55 @@ export const WalletContextProvider = ({children}) => {
     });
     addLog("Sending transaction...");
     const url = buildUrl("signAndSendTransaction", params);
-    Linking.openURL(url);
+    
+    return new Promise((resolve, reject) => {
+      let subscription;
+  
+      const onReceiveURL = ({url: responseUrl}) => {
+        if (responseUrl.includes(onSignAndSendTransactionRedirectLink)) {
+          cleanup();
+          const urlParams = new URLSearchParams(responseUrl.split('?')[1]);
+          const signedTransaction = urlParams.get('data');
+          if (signedTransaction) {
+            resolve(signedTransaction);
+          } else {
+            reject(new Error('Failed to get signed transaction'));
+          }
+        }
+      };
+  
+      const cleanup = () => {
+        if (subscription) {
+          subscription.remove();
+        }
+      };
+  
+      subscription = Linking.addEventListener('url', onReceiveURL);
+      Linking.openURL(url);
+  
+      // Set a timeout to clean up if we don't get a response
+      const timeoutId = setTimeout(() => {
+        cleanup();
+        reject(new Error('Transaction signing timed out'));
+      }, 60000); // 60 second timeout
+  
+      // Modify the promise to clear the timeout on resolution or rejection
+      return {
+        then: (onfulfilled, onrejected) => 
+          Promise.prototype.then.call(
+            promise,
+            (result) => {
+              clearTimeout(timeoutId);
+              return onfulfilled(result);
+            },
+            (error) => {
+              clearTimeout(timeoutId);
+              return onrejected(error);
+            }
+          )
+      };
+    });
   };
-
   const signAllTransactions = async () => {
     const transactions = await Promise.all([
       createTransferTransaction(),
@@ -319,6 +390,7 @@ export const WalletContextProvider = ({children}) => {
 
     addLog("Signing message...");
     const url = buildUrl("signMessage", params);
+    // console.log("url",url)
     Linking.openURL(url);
   };
 

@@ -3,6 +3,11 @@
     "name": "document_storage",
     "instructions": [
         {
+            "name": "helloWorld",
+            "accounts": [],
+            "args": []
+        },
+        {
             "name": "sendDocument",
             "accounts": [
                 {
@@ -82,7 +87,7 @@
                 {
                     "name": "userPhoto",
                     "isMut": true,
-                    "isSigner": true
+                    "isSigner": false
                 },
                 {
                     "name": "user",
@@ -99,10 +104,6 @@
                 {
                     "name": "imageHash",
                     "type": "string"
-                },
-                {
-                    "name": "user",
-                    "type": "publicKey"
                 }
             ]
         },
