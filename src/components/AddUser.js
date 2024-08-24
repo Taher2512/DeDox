@@ -4,7 +4,7 @@ import { Alert, Text, TouchableOpacity, View } from 'react-native'
 import idl from "../../contracts/idl/idl.json"
 // import { Program, Provider, web3, BN } from '@project-serum/anchor';
 import { Connection, PublicKey, SystemProgram, Transaction, TransactionInstruction,Keypair, SendTransactionError } from "@solana/web3.js";
-import { Program, AnchorProvider, web3, getProvider } from "@project-serum/anchor";
+import { Program, AnchorProvider, web3, getProvider, BN } from "@project-serum/anchor";
 import { User } from '../models/User';
 // import { useConnection } from './providers/ConnectionProvider';
 // import {transact, Web3MobileWallet,} from "@solana-mobile/mobile-wallet-adapter-protocol-web3js"
@@ -66,7 +66,7 @@ export default function AddUser() {
         initializeWallet();
       }, []);
    
-const sendDocument = async () => {
+const addUser = async () => {
   if (!phantomWalletPublicKey) {
     Alert.alert('Error', 'Wallet not connected');
     return;
@@ -88,24 +88,6 @@ const sendDocument = async () => {
       programID
     );
     console.log("User photo PDA:", userPhotoPDA.toString());
-    
-    const instructionData = new AddUserPhotoInstruction({
-      imageHash: imageHash,
-    });
-
-    const serializedData = instructionData.serialize();
-    console.log("Serialized instruction data length:", serializedData.length);
-
-    const instruction = new TransactionInstruction({
-      keys: [
-        { pubkey: pubKey, isSigner: true, isWritable: false },
-        { pubkey: userPhotoPDA, isSigner: false, isWritable: true },
-        { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
-      ],
-      programId: programID,
-      data: serializedData // 2 is the instruction index
-    });
-
     const transaction = new Transaction()
     const customProvider={
       publicKey:pubKey,
@@ -119,19 +101,16 @@ const sendDocument = async () => {
       userPhoto:userPhotoPDA,
     }).instruction()
     transaction.add(tx)
-
     transaction.feePayer = pubKey;
     const { blockhash, lastValidBlockHeight } = await CONNECTION.getLatestBlockhash('confirmed');
     transaction.recentBlockhash = blockhash;
 
     console.log("Transaction before sending to Phantom:", transaction);
-
+    // const data=await program.account.userPhoto.fetch(userPhotoPDA)
+    //  console.log("data",data)
     try {
       const signedTransaction = await signAndSendTransaction(transaction);
       console.log("Signed transaction:", signedTransaction);
-
-      
-
       Alert.alert("Success", "User photo added successfully");
     } catch (signError) {
       console.error('Error signing or sending transaction:', signError);
@@ -142,7 +121,62 @@ const sendDocument = async () => {
     Alert.alert('Error', 'Failed to prepare transaction: ' + error.message);
   }
   };
-  
+  const sendDocument=async()=>{
+    if (!phantomWalletPublicKey) {
+      Alert.alert('Error', 'Wallet not connected');
+      return;
+    }
+    try {
+      // ... (previous code remains the same)
+      const pubKey = new PublicKey(phantomWalletPublicKey);
+      const documentId = 1;
+      console.log("Using public key:", pubKey.toString());
+      const [documentPDA, bump] = await PublicKey.findProgramAddress(
+        [
+          Buffer.from("document"),
+          pubKey.toBuffer(),
+          new BN(documentId).toArrayLike(Buffer, 'le', 8)
+        ],
+        programID
+      );
+      console.log("Document PDA:", documentPDA.toString());
+      const transaction = new Transaction()
+      const customProvider={
+        publicKey:pubKey,
+        signTransaction:signAndSendTransaction,
+        signAllTransactions:signAllTransactions,
+        connection:CONNECTION
+      }
+      console.log("reached here",pubKey)
+      const program = new Program(idl, "2ooqk3QB9KVqcwKE8EnxDNoUnTAMfTH43qmqtMA1T1zk", customProvider)
+      const tx = await program.methods.addDocument(
+        new BN(documentId),
+        imageHash,
+        new BN(Date.now()),
+        [new PublicKey("AKmJpjSdYH2uhewVJWE7CucxGPzUTBw3ycL1qAbxxTDg"),pubKey] // Pass the array of PublicKey objects
+      ).accounts({
+        document: documentPDA,
+        user: pubKey,
+        systemProgram: SystemProgram.programId,
+      }).instruction()
+      transaction.add(tx)
+      transaction.feePayer = pubKey;
+      const { blockhash, lastValidBlockHeight } = await CONNECTION.getLatestBlockhash('confirmed');
+      transaction.recentBlockhash = blockhash;
+      try {
+        const signedTransaction = await signAndSendTransaction(transaction);
+        console.log("Signed transaction:", signedTransaction);
+        Alert.alert("Success", "Document added successfully");
+      } catch (signError) {
+        console.error('Error signing or sending transaction:', signError);
+        Alert.alert('Error', 'Failed to sign or send transaction: ' + signError.message);
+      }
+      // ... (rest of the function remains the same)
+    } catch (error) {
+      console.error('Error preparing transaction:', error);
+      Alert.alert('Error', 'Failed to prepare transaction: ' + error.message);
+    }
+  }
   return (
     <View>
         <TouchableOpacity onPress={sendDocument} style={{width:200,height:60,backgroundColor:'white',padding:10,borderRadius:15}}>

@@ -8,12 +8,12 @@
             "args": []
         },
         {
-            "name": "sendDocument",
+            "name": "addDocument",
             "accounts": [
                 {
                     "name": "document",
                     "isMut": true,
-                    "isSigner": true
+                    "isSigner": false
                 },
                 {
                     "name": "user",
@@ -28,7 +28,7 @@
             ],
             "args": [
                 {
-                    "name": "id",
+                    "name": "documentId",
                     "type": "u64"
                 },
                 {
@@ -36,18 +36,14 @@
                     "type": "string"
                 },
                 {
-                    "name": "uploader",
-                    "type": "publicKey"
+                    "name": "date",
+                    "type": "i64"
                 },
                 {
                     "name": "signers",
                     "type": {
                         "vec": "publicKey"
                     }
-                },
-                {
-                    "name": "date",
-                    "type": "i64"
                 }
             ]
         },
@@ -106,64 +102,6 @@
                     "type": "string"
                 }
             ]
-        },
-        {
-            "name": "getAllDocuments",
-            "accounts": [
-                {
-                    "name": "documents",
-                    "isMut": false,
-                    "isSigner": false
-                }
-            ],
-            "args": [],
-            "returns": {
-                "vec": {
-                    "defined": "DocumentInfo"
-                }
-            }
-        },
-        {
-            "name": "getAllSignedDocuments",
-            "accounts": [
-                {
-                    "name": "signedDocuments",
-                    "isMut": false,
-                    "isSigner": false
-                },
-                {
-                    "name": "user",
-                    "isMut": false,
-                    "isSigner": true
-                }
-            ],
-            "args": [],
-            "returns": {
-                "vec": {
-                    "defined": "SignedDocumentInfo"
-                }
-            }
-        },
-        {
-            "name": "getAllUserPhotos",
-            "accounts": [
-                {
-                    "name": "userPhotos",
-                    "isMut": false,
-                    "isSigner": false
-                },
-                {
-                    "name": "user",
-                    "isMut": false,
-                    "isSigner": true
-                }
-            ],
-            "args": [],
-            "returns": {
-                "vec": {
-                    "defined": "UserPhotoInfo"
-                }
-            }
         }
     ],
     "accounts": [
@@ -247,15 +185,6 @@
                     {
                         "name": "uploader",
                         "type": "publicKey"
-                    },
-                    {
-                        "name": "signers",
-                        "type": {
-                            "array": [
-                                "publicKey",
-                                10
-                            ]
-                        }
                     },
                     {
                         "name": "date",

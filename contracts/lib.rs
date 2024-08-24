@@ -11,20 +11,19 @@ pub mod document_storage {
         msg!("Hello, world! This is a test message from the Solana program.");
         Ok(())
     }
-   pub fn send_document(
-        ctx: Context<SendDocument>,
-        id: u64,  // Now accepting id from client
+   pub fn add_document(
+        ctx: Context<AddDocument>,
+        document_id: u64,
         image_hash: String,
-        uploader: Pubkey,
-        signers: Vec<Pubkey>,
         date: i64,
+        signers: Vec<Pubkey>,
     ) -> Result<()> {
         let document = &mut ctx.accounts.document;
-        document.id = id;  // Use the provided id
+        document.id = document_id;
         document.image_hash = image_hash;
-        document.uploader = uploader;
-        document.signers = signers;
+        document.uploader = *ctx.accounts.user.key;
         document.date = date;
+        document.signers = signers;
 
         Ok(())
     }
@@ -53,39 +52,6 @@ pub mod document_storage {
     Ok(())
 }
 
-
-    pub fn get_all_documents(ctx: Context<GetAllDocuments>) -> Result<Vec<DocumentInfo>> {
-        let documents = &ctx.accounts.documents;
-        let document_info = DocumentInfo {
-            id: documents.id,
-            image_hash: documents.image_hash.clone(),
-            uploader: documents.uploader,
-            signers: documents.signers.clone().try_into().unwrap_or([Pubkey::default(); 10]),
-            date: documents.date,
-        };
-
-        Ok(vec![document_info])
-    }
-
-    pub fn get_all_signed_documents(ctx: Context<GetAllSignedDocuments>) -> Result<Vec<SignedDocumentInfo>> {
-        let signed_documents = &ctx.accounts.signed_documents;
-        let signed_document_info = SignedDocumentInfo {
-            doc_id: signed_documents.doc_id,
-            signed_by: signed_documents.signed_by,
-        };
-
-        Ok(vec![signed_document_info])
-    }
-
-    pub fn get_all_user_photos(ctx: Context<GetAllUserPhotos>) -> Result<Vec<UserPhotoInfo>> {
-        let user_photos = &ctx.accounts.user_photos;
-        let user_photo_info = UserPhotoInfo {
-            image_hash: user_photos.image_hash.clone(),
-            user: user_photos.user,
-        };
-
-        Ok(vec![user_photo_info])
-    }
 }
 
 
@@ -112,8 +78,15 @@ pub struct HelloWorld<> {
     // No accounts required
 }
 #[derive(Accounts)]
-pub struct SendDocument<'info> {
-    #[account(init, payer = user, space = 8 + 8 + 32 + 32 + 32 * 10 + 8)]
+#[instruction(document_id: u64, image_hash: String, date: i64, signers: Vec<Pubkey>)]
+pub struct AddDocument<'info> {
+    #[account(
+        init,
+        payer = user,
+        space = 8 + 8 + 256 + 32 + 8 + (32 * signers.len()), // Dynamic space based on number of signers
+        seeds = [b"document", user.key().as_ref(), &document_id.to_le_bytes()],
+        bump
+    )]
     pub document: Account<'info, Document>,
     #[account(mut)]
     pub user: Signer<'info>,
@@ -173,7 +146,6 @@ pub struct DocumentInfo {
     pub id: u64,
     pub image_hash: String,
     pub uploader: Pubkey,
-    pub signers: [Pubkey;10],
     pub date: i64,
 }
 
