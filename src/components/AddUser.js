@@ -4,7 +4,7 @@ import { Alert, Text, TouchableOpacity, View } from 'react-native'
 import idl from "../../contracts/idl/idl.json"
 // import { Program, Provider, web3, BN } from '@project-serum/anchor';
 import { Connection, PublicKey, SystemProgram, Transaction, TransactionInstruction,Keypair, SendTransactionError } from "@solana/web3.js";
-import { Program, AnchorProvider, web3 } from "@project-serum/anchor";
+import { Program, AnchorProvider, web3, getProvider } from "@project-serum/anchor";
 import { User } from '../models/User';
 // import { useConnection } from './providers/ConnectionProvider';
 // import {transact, Web3MobileWallet,} from "@solana-mobile/mobile-wallet-adapter-protocol-web3js"
@@ -83,7 +83,7 @@ const sendDocument = async () => {
     }
 
     // Derive PDA for user_photo
-    const [userPhotoPDA] = await PublicKey.findProgramAddress(
+    const [userPhotoPDA,bump] = await PublicKey.findProgramAddress(
       [Buffer.from("user_photo"), pubKey.toBuffer()],
       programID
     );
@@ -98,16 +98,28 @@ const sendDocument = async () => {
 
     const instruction = new TransactionInstruction({
       keys: [
+        { pubkey: pubKey, isSigner: true, isWritable: false },
         { pubkey: userPhotoPDA, isSigner: false, isWritable: true },
-        { pubkey: pubKey, isSigner: true, isWritable: true },
         { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
       ],
       programId: programID,
-      data: [Buffer.from([2, ...serializedData]), ] // 2 is the instruction index
+      data: serializedData // 2 is the instruction index
     });
 
-    const transaction = new Transaction().add(instruction);
-    
+    const transaction = new Transaction()
+    const customProvider={
+      publicKey:pubKey,
+      signTransaction:signAndSendTransaction,
+      signAllTransactions:signAllTransactions,
+      connection:CONNECTION
+    }
+    const program=new Program(idl,"2ooqk3QB9KVqcwKE8EnxDNoUnTAMfTH43qmqtMA1T1zk",customProvider)
+    const tx=await program.methods.addUserPhoto(imageHash).accounts({
+      user:pubKey,
+      userPhoto:userPhotoPDA,
+    }).instruction()
+    transaction.add(tx)
+
     transaction.feePayer = pubKey;
     const { blockhash, lastValidBlockHeight } = await CONNECTION.getLatestBlockhash('confirmed');
     transaction.recentBlockhash = blockhash;
@@ -118,17 +130,7 @@ const sendDocument = async () => {
       const signedTransaction = await signAndSendTransaction(transaction);
       console.log("Signed transaction:", signedTransaction);
 
-      // Decode and send the signed transaction
-      // const decodedTransaction = Transaction.from(bs58.decode(signedTransaction));
-      // const txSignature = await CONNECTION.sendRawTransaction(decodedTransaction.serialize());
-      // console.log("Transaction signature:", txSignature);
-
-      // const confirmation = await CONNECTION.confirmTransaction({
-      //   signature: txSignature,
-      //   blockhash: blockhash,
-      //   lastValidBlockHeight: lastValidBlockHeight,
-      // });
-      // console.log("Transaction confirmed:", confirmation);
+      
 
       Alert.alert("Success", "User photo added successfully");
     } catch (signError) {
@@ -140,71 +142,7 @@ const sendDocument = async () => {
     Alert.alert('Error', 'Failed to prepare transaction: ' + error.message);
   }
   };
-  const callHelloWorld = async () => {
-  if (!phantomWalletPublicKey) {
-    Alert.alert('Error', 'Wallet not connected');
-    return;
-  }
-
-  try {
-    const provider = new AnchorProvider(CONNECTION, {
-      publicKey: phantomWalletPublicKey,
-      signTransaction: signAndSendTransaction,
-      signAllTransactions: signAllTransactions,
-    }, { commitment: 'confirmed' });
-
-    const program = new Program(idl, programID, provider);
-
-    const transaction = new Transaction();
-    const instruction = await program.instruction.helloWorld({
-      accounts: {
-        user: phantomWalletPublicKey,
-        systemProgram: SystemProgram.programId,
-      },
-    });
-
-    transaction.add(instruction);
-    transaction.feePayer = phantomWalletPublicKey;
-    const { blockhash } = await CONNECTION.getLatestBlockhash();
-    transaction.recentBlockhash = blockhash;
-
-    console.log("Transaction before signing:", transaction);
-
-    const signedTransaction = await signAndSendTransaction(transaction);
-    console.log("Signed transaction:", signedTransaction);
-
-    try {
-      // Decode the base58 encoded transaction
-      // const decodedTransaction = bs58.decode(signedTransaction);
-      
-      // console.log("Decoded transaction:", decodedTransaction);
-
-      // const txSignature = await CONNECTION.sendRawTransaction(decodedTransaction);
-      // console.log("Transaction signature:", txSignature);
-
-      // const confirmation = await CONNECTION.confirmTransaction(txSignature, 'confirmed');
-      // console.log("Transaction confirmed:", confirmation);
-
-      // if (confirmation.value.err) {
-      //   throw new Error(`Transaction failed: ${JSON.stringify(confirmation.value.err)}`);
-      // }
-
-      // Alert.alert("Success", "Hello World function called successfully");
-    } catch (sendError) {
-      console.error('Error sending transaction:', sendError);
-      if (sendError instanceof SendTransactionError) {
-        const logs = sendError.logs;
-        console.error('Transaction failed. Logs:', logs);
-        Alert.alert('Error', 'Transaction failed. Check console for logs.');
-      } else {
-        Alert.alert('Error', 'Failed to send transaction: ' + sendError.message);
-      }
-    }
-  } catch (error) {
-    console.error('Error calling Hello World function:', error);
-    Alert.alert('Error', 'Failed to call Hello World function: ' + error.message);
-  }
-};
+  
   return (
     <View>
         <TouchableOpacity onPress={sendDocument} style={{width:200,height:60,backgroundColor:'white',padding:10,borderRadius:15}}>

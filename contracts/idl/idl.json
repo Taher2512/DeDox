@@ -85,14 +85,14 @@
             "name": "addUserPhoto",
             "accounts": [
                 {
-                    "name": "userPhoto",
-                    "isMut": true,
-                    "isSigner": false
-                },
-                {
                     "name": "user",
                     "isMut": true,
                     "isSigner": true
+                },
+                {
+                    "name": "userPhoto",
+                    "isMut": true,
+                    "isSigner": false
                 },
                 {
                     "name": "systemProgram",

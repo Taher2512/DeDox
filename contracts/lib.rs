@@ -7,6 +7,10 @@ pub mod document_storage {
     use super::*;
 
     // ... (previous functions remain the same)
+    pub fn hello_world(ctx: Context<HelloWorld>) -> Result<()> {
+        msg!("Hello, world! This is a test message from the Solana program.");
+        Ok(())
+    }
    pub fn send_document(
         ctx: Context<SendDocument>,
         id: u64,  // Now accepting id from client
@@ -35,16 +39,21 @@ pub mod document_storage {
 
         Ok(())
     }
-   pub fn add_user_photo(
-    ctx: Context<AddUserPhoto>,
-    image_hash: String,
-) -> Result<()> {
+   pub fn add_user_photo(ctx: Context<AddUserPhoto>, image_hash: String) -> Result<()> {
+    msg!("Starting add_user_photo");
     let user_photo = &mut ctx.accounts.user_photo;
-    user_photo.image_hash = image_hash;
-    user_photo.user = ctx.accounts.user.key();
+    
+    msg!("Image hash: {}", image_hash);
+    msg!("User key: {}", ctx.accounts.user.key);
 
+    user_photo.image_hash = image_hash;
+    user_photo.user = *ctx.accounts.user.key;
+
+    msg!("User photo added successfully");
     Ok(())
 }
+
+
     pub fn get_all_documents(ctx: Context<GetAllDocuments>) -> Result<Vec<DocumentInfo>> {
         let documents = &ctx.accounts.documents;
         let document_info = DocumentInfo {
@@ -79,6 +88,7 @@ pub mod document_storage {
     }
 }
 
+
 #[derive(Accounts)]
 pub struct GetAllDocuments<'info> {
     pub documents: Account<'info, Document>,
@@ -97,6 +107,10 @@ pub struct GetAllUserPhotos<'info> {
 }
 
 // ... (other accounts and structs remain the same)
+#[derive(Accounts)]
+pub struct HelloWorld<> {
+    // No accounts required
+}
 #[derive(Accounts)]
 pub struct SendDocument<'info> {
     #[account(init, payer = user, space = 8 + 8 + 32 + 32 + 32 * 10 + 8)]
@@ -117,6 +131,8 @@ pub struct AddSignedDocument<'info> {
 
 #[derive(Accounts)]
 pub struct AddUserPhoto<'info> {
+    #[account(mut)]
+    pub user: Signer<'info>,
     #[account(
         init,
         payer = user,
@@ -125,8 +141,7 @@ pub struct AddUserPhoto<'info> {
         bump
     )]
     pub user_photo: Account<'info, UserPhoto>,
-    #[account(mut)]
-    pub user: Signer<'info>,
+  
     pub system_program: Program<'info, System>,
 }
 

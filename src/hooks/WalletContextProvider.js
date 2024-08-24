@@ -131,6 +131,7 @@ export const WalletContextProvider = ({children}) => {
         dappKeyPair.secretKey
       );
       console.log("sharedSecretDapp", sharedSecretDapp);
+      console.log("data",params.get("data"))
       const connectData = decryptPayload(
         params.get("data"),
         params.get("nonce"),
