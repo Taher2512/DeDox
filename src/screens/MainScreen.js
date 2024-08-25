@@ -18,6 +18,7 @@ import ConnectButton from '../components/ConnectButton';
 import AccountInfo from '../components/AccountInfo';
 import {Header} from '../components/Header';
 import UploadModal from '../components/UploadModal';
+import AddUser from '../components/Buttons';
 
 export default function MainScreen() {
   const {connection} = useConnection();
@@ -80,6 +81,7 @@ export default function MainScreen() {
             <IconButton icon="plus" size={25} iconColor="#fff" />
           </TouchableOpacity>
         )}
+        <AddUser />
         <UploadModal
           visible={modalVisible}
           hideModal={hideModal}
@@ -141,3 +143,9 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
 });
+
+// "@solana/wallet-adapter-react": "^0.15.35",
+// "@solana/web3.js": "^1.95.2",
+// "@project-serum/anchor": "^0.26.0",
+// "assert": "^2.1.0",
+// "buffer": "^6.0.3",
