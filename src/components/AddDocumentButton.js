@@ -58,7 +58,7 @@ export default function AddDocumentButton({imageHash,docPDA,docId,signers,style,
           try {
             const signedTransaction = await signAndSendTransaction(transaction);
             console.log("Signed transaction:", signedTransaction);
-            return documentPDA
+           //add firebse code here and pass the documentPDA
           } catch (signError) {
             console.error('Error signing or sending transaction:', signError);
             Alert.alert('Error', 'Failed to sign or send transaction: ' + signError.message);
