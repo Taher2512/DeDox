@@ -30,11 +30,11 @@ pub mod document_storage {
      pub fn add_signed_document(
         ctx: Context<AddSignedDocument>,
         doc_id: u64,
-        signature: Pubkey,
+        signedBy: Pubkey,
     ) -> Result<()> {
         let signed_document = &mut ctx.accounts.signed_document;
         signed_document.doc_id = doc_id;
-        signed_document.signed_by = signature;
+        signed_document.signed_by = signedBy;
 
         Ok(())
     }
@@ -60,17 +60,7 @@ pub struct GetAllDocuments<'info> {
     pub documents: Account<'info, Document>,
 }
 
-#[derive(Accounts)]
-pub struct GetAllSignedDocuments<'info> {
-    pub signed_documents: Account<'info, SignedDocument>,
-    pub user: Signer<'info>,
-}
 
-#[derive(Accounts)]
-pub struct GetAllUserPhotos<'info> {
-    pub user_photos: Account<'info, UserPhoto>,
-    pub user: Signer<'info>,
-}
 
 // ... (other accounts and structs remain the same)
 #[derive(Accounts)]
@@ -94,8 +84,15 @@ pub struct AddDocument<'info> {
 }
 
 #[derive(Accounts)]
+#[instruction( doc_id: u64,signedBy: Pubkey)]
 pub struct AddSignedDocument<'info> {
-    #[account(init, payer = user, space = 8 + 8 + 32)]
+    #[account(
+        init,
+        payer = user,
+        space = 8 + 8 + 32, 
+        seeds = [b"signeddocument", user.key().as_ref(), &doc_id.to_le_bytes()],
+        bump
+    )]
     pub signed_document: Account<'info, SignedDocument>,
     #[account(mut)]
     pub user: Signer<'info>,

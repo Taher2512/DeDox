@@ -14,24 +14,7 @@ const opts = {
   preflightCommitment: 'processed'
 };
 import bs58 from 'bs58';
-class AddUserPhotoInstruction {
-  constructor(props) {
-    this.imageHash = props.imageHash;
-  }
 
-  static schema = new Map([
-    [AddUserPhotoInstruction, {
-      kind: 'struct',
-      fields: [
-        ['imageHash', 'string'],
-      ]
-    }]
-  ]);
-
-  serialize() {
-    return borsh.serialize(AddUserPhotoInstruction.schema, this);
-  }
-}
 const CONNECTION = new Connection('https://devnet.helius-rpc.com/?api-key=e9bbe608-da76-49e8-a3bc-48d03381b6b3', 'confirmed');
 import usePhantomConnection from '../hooks/WalletContextProvider';
 export default function AddUser() {
@@ -121,7 +104,7 @@ const addUser = async () => {
     Alert.alert('Error', 'Failed to prepare transaction: ' + error.message);
   }
   };
-  const sendDocument=async()=>{
+  const sendDocument=async(docId,imageHash,signerArray)=>{
     if (!phantomWalletPublicKey) {
       Alert.alert('Error', 'Wallet not connected');
       return;
@@ -177,9 +160,63 @@ const addUser = async () => {
       Alert.alert('Error', 'Failed to prepare transaction: ' + error.message);
     }
   }
+  const signDocument=async()=>{
+    if (!phantomWalletPublicKey) {
+      Alert.alert('Error', 'Wallet not connected');
+      return;
+    }
+    try {
+      // ... (previous code remains the same)
+      const pubKey = new PublicKey(phantomWalletPublicKey);
+      const documentId = 1;
+      console.log("Using public key:", pubKey.toString());
+      const [documentPDA, bump] = await PublicKey.findProgramAddress(
+        [
+          Buffer.from("signeddocument"),
+          pubKey.toBuffer(),
+          new BN(documentId).toArrayLike(Buffer, 'le', 8)
+        ],
+        programID
+      );
+      console.log("signed document PDA:", documentPDA.toString());
+      const transaction = new Transaction()
+      const customProvider={
+        publicKey:pubKey,
+        signTransaction:signAndSendTransaction,
+        signAllTransactions:signAllTransactions,
+        connection:CONNECTION
+      }
+      console.log("reached here",pubKey)
+      const program = new Program(idl, "2ooqk3QB9KVqcwKE8EnxDNoUnTAMfTH43qmqtMA1T1zk", customProvider)
+      const tx = await program.methods.addSignedDocument(
+        new BN(documentId),
+        pubKey 
+      ).accounts({
+        signedDocument:documentPDA,
+        user: pubKey,
+        systemProgram: SystemProgram.programId,
+      }).instruction()
+      transaction.add(tx)
+      transaction.feePayer = pubKey;
+      const { blockhash, lastValidBlockHeight } = await CONNECTION.getLatestBlockhash('confirmed');
+      transaction.recentBlockhash = blockhash;
+      try {
+        const signedTransaction = await signAndSendTransaction(transaction);
+        console.log("Signed transaction:", signedTransaction);
+        Alert.alert("Success", "Document signed successfully");
+      } catch (signError) {
+        console.error('Error signing or sending transaction:', signError);
+        Alert.alert('Error', 'Failed to sign or send transaction: ' + signError.message);
+      }
+      // ... (rest of the function remains the same)
+    } catch (error) {
+      console.error('Error preparing transaction:', error);
+      Alert.alert('Error', 'Failed to prepare transaction: ' + error.message);
+    }
+  }
   return (
     <View>
-        <TouchableOpacity onPress={sendDocument} style={{width:200,height:60,backgroundColor:'white',padding:10,borderRadius:15}}>
+        <TouchableOpacity onPress={signDocument} style={{width:200,height:60,backgroundColor:'white',padding:10,borderRadius:15}}>
           <Text style={{color:'black',textAlign:'center',fontSize:20}}>Upload DOcs</Text>
         </TouchableOpacity>
     </View>
