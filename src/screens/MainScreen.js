@@ -21,7 +21,7 @@ import usePhantomConnection from '../hooks/WalletContextProvider';
 export default function MainScreen() {
   const [balance, setBalance] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
-  const {connect}=usePhantomConnection()
+  const {connect} = usePhantomConnection();
   // const fetchAndUpdateBalance = useCallback(
   //   async account => {
   //     console.log('Fetching balance for: ' + account.publicKey);
@@ -53,18 +53,28 @@ export default function MainScreen() {
       style={styles.mainContainer}>
       <View style={styles.mainContainer}>
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-          
-            <>
-              <Header />
-              <View style={styles.connectButtonContainer}>
-              
-                <TouchableOpacity style={{width:'80%',borderRadius:15,borderWidth:1,borderColor:'white',padding:15}} >
-                  <Text style={{color:"white",fontSize:20,fontWeight:"bold"}} onPress={connect}>Connect</Text>
-                </TouchableOpacity>
-                <AddUser/>
-              </View>
-            </>
-          
+          <>
+            <Header />
+            <View style={styles.connectButtonContainer}>
+              <TouchableOpacity
+                style={{
+                  width: '80%',
+                  borderRadius: 15,
+                  borderWidth: 1,
+                  borderColor: 'white',
+                  padding: 15,
+                  alignItems: 'center',
+                }}>
+                <Text
+                  style={{color: 'white', fontSize: 20, fontWeight: 'bold'}}
+                  onPress={connect}>
+                  Connect Wallet
+                </Text>
+              </TouchableOpacity>
+              {/* <AddUser /> */}
+            </View>
+          </>
+
           {/* {selectedAccount && (
             <AccountInfo
               selectedAccount={selectedAccount}
@@ -107,6 +117,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: -70,
   },
   floatingButton: {
     position: 'absolute',
