@@ -1,52 +1,47 @@
 /*eslint-disable*/
 import React, { useState } from 'react'
-import { ImageBackground, StatusBar, TouchableOpacity, View,Text, Image, Modal, Touchable, ScrollView,Dimensions } from 'react-native'
+import { ImageBackground, StatusBar, TouchableOpacity, View,Text, Image, Modal, ScrollView,Dimensions, ToastAndroid } from 'react-native'
 import EnhancedDarkThemeBackground from './EnhancedDarkThemeBackground'
 import { GestureHandlerRootView, PanGestureHandler } from 'react-native-gesture-handler'
 import LinearGradient from 'react-native-linear-gradient'
-import Animated, { runOnJS, useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
+import Animated, { runOnJS, useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated'
+import Clipboard from '@react-native-clipboard/clipboard'
 
 export default function DocumentDetail() {
     const signers=[1,2,3,4]
     const Children=()=>{
+        const ImageComponent=Animated.createAnimatedComponent(Image)
         const [visible, setvisible] = useState(false)
         const address="2ooqk3QB9KVqcwKE8EnxDNoUnTAMfTH43qmqtMA1T1zk"
         const x=useSharedValue(0)
         const y=useSharedValue(0)
-        const width=Dimensions.get('screen').width-95
+        const width=Dimensions.get('screen').width
         const v1=useSharedValue(0)
          const v2=useSharedValue(1)
-        const gestureHandler=useAnimatedGestureHandler({
-          onStart:(e,c)=>{
-             c.startX=x.value
-              c.startY=y.value
-          },
-          onActive:(e,c)=>{
-            if(x.value>c.startX+e.translationX){
-              v2.value=v2.value+0.02
-            }
-            if(x.value>width/2){
-            v1.value=withTiming(360,{duration:650})  
-            v2.value=v2.value-0.02
-            }
-            else{
-              v1.value=0
-            }
-            x.value=c.startX+e.translationX
-             y.value=0
-          },
-          onEnd:(e,c)=>{
-    
-            if(x.value>width){
-            //  runOnJS(navigation.navigate)(('nextpage'))
-             x.value=withTiming(0,{duration:1000});
-            }else{
-              x.value=withTiming(0,{duration:500});
-              y.value=withTiming(0,{duration:500})
-              v2.value=1
-            }
-          }
-      })
+         const translateX = useSharedValue(0);
+        const signDocument=async()=>{
+          console.log("Document signed")
+        }
+         const gestureHandler=useAnimatedGestureHandler(({
+            onStart: (_, context) => {
+                context.startX = translateX.value;
+              },
+              onActive: (event, context) => {
+                if(context.startX+event.translationX>=0 && context.startX+event.translationX<(300-65)){
+                translateX.value = context.startX + event.translationX;
+                }
+              },
+              onEnd: () => {
+               
+                if(translateX.value>300-68){
+                     runOnJS(signDocument)()
+                }
+                else{
+                    translateX.value = withSpring(0);
+                }
+              },
+        }))
+        
         const animatedStyle2=useAnimatedStyle(()=>{
           return{
               transform:[{translateX:x.value>=width?width:x.value<=0?0:x.value},{translateY:0}]
@@ -97,8 +92,14 @@ export default function DocumentDetail() {
                    <Text style={{color:"white",fontSize:22,fontWeight:"bold"}}>Uploader</Text>
                    <View style={{flexDirection:'row',alignItems:"center",justifyContent:'space-around'}}>
                    <Image style={{height:80,width:80,borderRadius:15}} source={require('../assets/backgrounds/dummyselfie.jpg')}/>
-                   <View style={{flex:1,height:90,padding:15,justifyContent:'center'}}>
+                   <View style={{flex:1,height:90,padding:15,justifyContent:'center',flexDirection:'row',gap:10}}>
                    <Text style={{color:'white',fontSize:16}}>Address: {address.substring(0,4)}....{address.substring(address.length-4,address.length)}</Text>
+                   <TouchableOpacity onPress={()=>{
+                    Clipboard.setString(address)
+                    ToastAndroid.show("Address copied to clipboard",ToastAndroid.SHORT)
+                    }}>
+                    <Image style={{height:20,width:20,tintColor:'white'}} source={require('../assets/backgrounds/copy.png')}/>
+                   </TouchableOpacity>
                    </View>
                    </View>
                    <Text style={{color:"white",fontSize:22,fontWeight:"bold"}}>Signers</Text>
@@ -107,29 +108,40 @@ export default function DocumentDetail() {
                             <View key={index} style={{flexDirection:'row',alignItems:"center",justifyContent:'space-around'}}>
                    <Image style={{height:80,width:80,borderRadius:15}} source={require('../assets/backgrounds/dummyselfie.jpg')}/>
                    <View style={{flex:1,height:90,padding:10,justifyContent:'space-around'}}>
+                   <View style={{height:45,flexDirection:'row',gap:10,width:'100%',alignItems:'center'}}>
                    <Text style={{color:'white',fontSize:16}}>Address: {address.substring(0,4)}....{address.substring(address.length-4,address.length)}</Text>
-                   <View style={{backgroundColor:'#a9ffa9', borderColor:'green',borderWidth:2,width:100,alignItems:'center',justifyContent:'center',borderRadius:10,paddingVertical:5}}>
-                     <Text style={{color:'green',fontSize:16,fontWeight:'bold'}}>Signed</Text>
+                   <TouchableOpacity onPress={()=>{
+                    Clipboard.setString(address)
+                    ToastAndroid.show("Address copied to clipboard",ToastAndroid.SHORT)
+                    }}>
+                    <Image style={{height:20,width:20,tintColor:'white'}} source={require('../assets/backgrounds/copy.png')}/>
+                   </TouchableOpacity>
+                   </View>
+                   <View style={{backgroundColor:'rgba(0,3,0,0.3)', borderColor:'green',borderWidth:2,width:100,alignItems:'center',justifyContent:'center',borderRadius:10,paddingVertical:4}}>
+                     <Text style={{color:'green',fontSize:15,fontWeight:'bold'}}>Signed</Text>
                    </View>
                    </View>
                    </View>
                         )
                     })}
-                   
+                     <View style={{width:'100%',padding:15,borderWidth:1,borderColor:'orange',borderRadius:15,alignItems:'center',justifyContent:"center",marginTop:20}}>
+                        <Text style={{color:'white',fontSize:16,fontWeight:'bold',textAlign:'center'}}>Please read the document carefully before signing</Text>
+                     </View>
                     <GestureHandlerRootView>
                     <View style={{width:'100%',alignItems:"center",justifyContent:'center',padding:15,gap:20}}>
-                    <LinearGradient   colors={['black','black','black']} style={{width:"100%",height:65,backgroundColor:'green',borderRadius:5,padding:5,flexDirection:"row",elevation:10}}>
-                    <PanGestureHandler  onGestureEvent={gestureHandler} >
-                        <Animated.View  style={[{borderRadius:5,backgroundColor:"#d4ff0d",height:'100%',aspectRatio:1,alignItems:"center",justifyContent:"center",elevation:10,zIndex:2},animatedStyle2]}>
+                    <PanGestureHandler   onGestureEvent={gestureHandler}   >
+                    <Animated.View    style={{width:300,height:65,backgroundColor:'black',borderRadius:5,padding:5,flexDirection:"row",elevation:10}}>
+
+                        <Animated.View  style={[{borderRadius:5,backgroundColor:"#d4ff0d",height:'100%',aspectRatio:1,alignItems:"center",justifyContent:"center",elevation:10,zIndex:2,transform:[{translateX}]}]}>
                     <ImageComponent source={require('../assets/next.png')} style={[{tintColor:'white'},animationstyle2]} />
                         <ImageComponent source={require('../assets/tick.png')} style={[{tintColor:'white'},animationstyle]} />
                         </Animated.View>
+                    <Animated.View style={{flex:1,justifyContent:'center',paddingLeft:30}}>
+                    <Animated.Text style={[{color:'white',fontSize:22,fontWeight:'bold',opacity:1},animatedStyle3]}>Sign the document</Animated.Text>
+                    </Animated.View>
+                    </Animated.View>
                     </PanGestureHandler>
-                    <View style={{flex:1,justifyContent:'center',paddingLeft:30}}>
-                    <Animated.Text style={[{color:'white',fontSize:22,fontWeight:'bold',opacity:1},animatedStyle3]}>Slide to place order</Animated.Text>
-                    </View>
 
-                    </LinearGradient>
                     </View>
                     </GestureHandlerRootView>
                     <View style={{height:50}}/>
