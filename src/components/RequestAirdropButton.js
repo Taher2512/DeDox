@@ -14,49 +14,12 @@ function convertLamportsToSOL(lamports) {
 
 const LAMPORTS_PER_AIRDROP = 1000000000;
 
-export default function RequestAirdropButton({
-  selectedAccount,
-  onAirdropComplete,
-}) {
-  const {connection} = useConnection();
-  const [airdropInProgress, setAirdropInProgress] = useState(false);
-  const requestAirdrop = useCallback(async () => {
-    const signature = await connection.requestAirdrop(
-      selectedAccount.publicKey,
-      LAMPORTS_PER_AIRDROP,
-    );
-
-    return await connection.confirmTransaction(signature);
-  }, [connection, selectedAccount]);
+export default function RequestAirdropButton({onRequestAirdrop}) {
   return (
     <TouchableOpacity
       className="bg-[#6495ED] rounded-full px-3 py-1"
-      disabled={airdropInProgress}
-      onPress={async () => {
-        if (airdropInProgress) {
-          return;
-        }
-        setAirdropInProgress(true);
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const result = await requestAirdrop();
-          alertAndLog(
-            'Funding successful:',
-            String(convertLamportsToSOL(LAMPORTS_PER_AIRDROP)) +
-              ' SOL added to ' +
-              selectedAccount.publicKey,
-          );
-          onAirdropComplete(selectedAccount);
-        } catch (err) {
-          alertAndLog(
-            'Failed to fund account:',
-            err instanceof Error ? err.message : err,
-          );
-        } finally {
-          setAirdropInProgress(false);
-        }
-      }}>
-      <Text className="text-white text-xs">Request Airdrop</Text>
+      onPress={onRequestAirdrop}>
+      <Text className="text-white text-xs font-medium">Request Airdrop</Text>
     </TouchableOpacity>
   );
 }

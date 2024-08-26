@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   subtitle: {
-    color: '#999',
+    color: '#ddd',
     fontSize: 16,
     fontWeight: '500',
     textAlign: 'center',
