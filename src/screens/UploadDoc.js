@@ -1,5 +1,6 @@
 import React, {useEffect, useState, useMemo, useCallback} from 'react';
 import {
+  Alert,
   Image,
   ScrollView,
   StatusBar,
@@ -19,6 +20,16 @@ import axios from 'axios';
 import {launchImageLibrary} from 'react-native-image-picker';
 import EnhancedDarkThemeBackground from './EnhancedDarkThemeBackground';
 import {useNavigation} from '@react-navigation/native';
+import AddDocumentButton from '../components/AddDocumentButton';
+import { jsiConfigureProps } from 'react-native-reanimated/lib/typescript/core';
+import usePhantomConnection from '../hooks/WalletContextProvider';
+import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
+import { BN, Program } from '@project-serum/anchor';
+import idl from "../../contracts/idl/idl.json"
+import { CONNECTION } from '../components/constants';
+import firestore from '@react-native-firebase/firestore';
+
+const programId = new PublicKey('2ooqk3QB9KVqcwKE8EnxDNoUnTAMfTH43qmqtMA1T1zk');
 
 const WalletAddressInput = React.memo(
   ({
@@ -86,6 +97,12 @@ const UploadDoc = ({route}) => {
   const {publicKey} = route.params;
   const navigation = useNavigation();
 
+  const {
+    phantomWalletPublicKey,
+    signAndSendTransaction,
+    signAllTransactions,
+  } = usePhantomConnection();
+
   useEffect(() => {
     if (publicKey) {
       setWalletAddresses([publicKey]);
@@ -139,13 +156,13 @@ const UploadDoc = ({route}) => {
   const handleUpload = useCallback(async () => {
     setUploading(true);
     if (!imageUri) {
-      alert('Please select an image');
+      Alert.alert('Please select an image');
       setUploading(false);
       return;
     }
 
     if (!validateWalletAddresses()) {
-      alert('Please correct the wallet addresses');
+      Alert.alert('Please correct the wallet addresses');
       setUploading(false);
       return;
     }
@@ -159,6 +176,7 @@ const UploadDoc = ({route}) => {
     formData.append('walletAddresses', JSON.stringify(walletAddresses));
 
     try {
+      // Upload image to IPFS
       const response = await axios.post(
         'https://dedox-backend.onrender.com/upload',
         formData,
@@ -172,23 +190,84 @@ const UploadDoc = ({route}) => {
       if (response.data.success === true) {
         console.log('Image uploaded successfully:', response.data);
         console.log('IPFS Hash:', response.data.ipfsHash);
-        ToastAndroid.show(
-          'Document Uploaded Successfully!',
-          ToastAndroid.SHORT,
+        
+        // Now proceed with blockchain upload
+        if (!phantomWalletPublicKey) {
+          Alert.alert('Error', 'Wallet not connected');
+          setUploading(false);
+          return;
+        }
+
+        const pubKey = new PublicKey(phantomWalletPublicKey);
+        console.log("Using public key:", pubKey.toString());
+        const signerArray = walletAddresses.map((signer) => new PublicKey(signer));
+        const docId = Date.now(); // Use current timestamp as docId
+        const [documentPDA, bump] = await PublicKey.findProgramAddress(
+          [
+            Buffer.from("document"),
+            pubKey.toBuffer(),
+            new BN(docId).toArrayLike(Buffer, 'le', 8)
+          ],
+          programId
         );
-        setTimeout(() => {
-          navigation.navigate('Home', {publicKey: publicKey});
-        }, 1000);
+        console.log("Document PDA:", documentPDA.toString());
+
+        const transaction = new Transaction();
+        const customProvider = {
+          publicKey: pubKey,
+          signTransaction: signAndSendTransaction,
+          signAllTransactions: signAllTransactions,
+          connection: CONNECTION
+        };
+
+        console.log("reached here", pubKey);
+        const program = new Program(idl, "2ooqk3QB9KVqcwKE8EnxDNoUnTAMfTH43qmqtMA1T1zk", customProvider);
+        const tx = await program.methods.addDocument(
+          new BN(docId),
+          response.data.ipfsHash,
+          new BN(Date.now()),
+          signerArray
+        ).accounts({
+          document: documentPDA,
+          user: pubKey,
+          systemProgram: SystemProgram.programId,
+        }).instruction();
+
+        transaction.add(tx);
+        transaction.feePayer = pubKey;
+        const { blockhash, lastValidBlockHeight } = await CONNECTION.getLatestBlockhash('confirmed');
+        transaction.recentBlockhash = blockhash;
+
+        try {
+          const signedTransaction = await signAndSendTransaction(transaction);
+          console.log("Signed transaction:", signedTransaction);
+          
+          await firestore().collection('documents').add({
+            documentPDA: documentPDA.toString()
+          });
+          
+          ToastAndroid.show(
+            'Document Uploaded Successfully to Solana!',
+            ToastAndroid.SHORT,
+          );
+
+          setTimeout(() => {
+            navigation.navigate('Home', {publicKey: publicKey});
+          }, 1000);
+        } catch (signError) {
+          console.error('Error signing or sending transaction:', signError);
+          Alert.alert('Error', 'Failed to sign or send transaction: ' + signError.message);
+        }
       } else {
-        alert('Failed to upload. Please try again.');
+        Alert.alert('Failed to upload. Please try again.');
       }
     } catch (error) {
       console.error('Error uploading image:', error);
-      alert('Failed to upload. Please try again.');
+      Alert.alert('Failed to upload. Please try again.');
     } finally {
       setUploading(false);
     }
-  }, [imageUri, validateWalletAddresses, walletAddresses]);
+  }, [imageUri, validateWalletAddresses, walletAddresses, phantomWalletPublicKey, signAndSendTransaction, signAllTransactions]);
 
   const Children = useMemo(() => {
     return (
@@ -240,7 +319,7 @@ const UploadDoc = ({route}) => {
           mode="contained"
           icon={uploading ? '' : 'cloud-upload'}
           style={[styles.button, {borderColor: '#fff', borderWidth: 0.4}]}>
-          {uploading ? 'Uploading...' : 'Upload'}
+          {uploading ? 'Uploading...' : 'Upload to IPFS and Solana'}
         </Button>
       </ScrollView>
     );

@@ -23,7 +23,7 @@ import {
   SystemProgram,
   Transaction,
 } from '@solana/web3.js';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 const NETWORK = clusterApiUrl('devnet');
 
@@ -82,11 +82,7 @@ const useContextProvider = createContext({
 export const WalletContextProvider = ({children}) => {
   const [deepLink, setDeepLink] = useState('');
   const [logs, setLogs] = useState([]);
-  const connection = new Connection(
-    // 'https://devnet.helius-rpc.com/?api-key=e9bbe608-da76-49e8-a3bc-48d03381b6b3',
-    NETWORK,
-    'confirmed',
-  );
+  const connection = new Connection(NETWORK, 'confirmed');
   const addLog = useCallback(log => setLogs(logs => [...logs, '> ' + log]), []);
   const scrollViewRef = useRef(null);
   const navigation = useNavigation();
@@ -166,7 +162,6 @@ export const WalletContextProvider = ({children}) => {
       setPhantomWalletPublicKey(new PublicKey(connectData.public_key));
       console.log('public key', connectData.public_key);
       addLog(JSON.stringify(connectData, null, 2));
-      navigation.navigate('Home', {publicKey: connectData.public_key});
     } else if (/onDisconnect/.test(url.pathname)) {
       setPhantomWalletPublicKey(null);
       addLog('Disconnected!');
@@ -250,94 +245,107 @@ export const WalletContextProvider = ({children}) => {
     Linking.openURL(url);
   };
 
-  // const disconnect = async () => {
-  //   const payload = {
-  //     session,
-  //   };
-  //   const [nonce, encryptedPayload] = encryptPayload(payload, sharedSecret);
+  const disconnect = async () => {
+    const payload = {
+      session,
+    };
+    const [nonce, encryptedPayload] = encryptPayload(payload, sharedSecret);
 
-  //   const params = new URLSearchParams({
-  //     dapp_encryption_public_key: bs58.encode(dappKeyPair.publicKey),
-  //     nonce: bs58.encode(nonce),
-  //     redirect_link: onDisconnectRedirectLink,
-  //     payload: bs58.encode(encryptedPayload),
-  //   });
+    const params = new URLSearchParams({
+      dapp_encryption_public_key: bs58.encode(dappKeyPair.publicKey),
+      nonce: bs58.encode(nonce),
+      redirect_link: onDisconnectRedirectLink,
+      payload: bs58.encode(encryptedPayload),
+    });
 
-  //   const url = buildUrl('disconnect', params);
-  //   Linking.openURL(url);
-  // };
+    const url = buildUrl('disconnect', params);
+    Linking.openURL(url);
+
+    // Clear the wallet state
+    setPhantomWalletPublicKey(null);
+    setSession(null);
+    setSharedSecret(null);
+    addLog('Disconnected!');
+    navigation.navigate('ConnectWallet'); // Adjust this based on your navigation setup
+  };
 
   const signAndSendTransaction = async transaction => {
     if (!phantomWalletPublicKey) return;
     setSubmitting(true);
-    transaction.feePayer = phantomWalletPublicKey;
-    transaction.recentBlockhash = (
-      await connection.getLatestBlockhash()
-    ).blockhash;
-    const serializedTransaction = transaction.serialize({
-      requireAllSignatures: false,
-    });
-    const payload = {
-      session,
-      transaction: bs58.encode(serializedTransaction),
-    };
-    const [nonce, encryptedPayload] = encryptPayload(payload, sharedSecret);
-    const params = new URLSearchParams({
-      dapp_encryption_public_key: bs58.encode(dappKeyPair.publicKey),
-      nonce: bs58.encode(nonce),
-      redirect_link: onSignAndSendTransactionRedirectLink,
-      payload: bs58.encode(encryptedPayload),
-    });
-    addLog('Sending transaction...');
-    const url = buildUrl('signAndSendTransaction', params);
+    try {
+      transaction.feePayer = phantomWalletPublicKey;
+      transaction.recentBlockhash = (
+        await connection.getLatestBlockhash()
+      ).blockhash;
+      const serializedTransaction = transaction.serialize({
+        requireAllSignatures: false,
+      });
+      const payload = {
+        session,
+        transaction: bs58.encode(serializedTransaction),
+      };
+      const [nonce, encryptedPayload] = encryptPayload(payload, sharedSecret);
+      const params = new URLSearchParams({
+        dapp_encryption_public_key: bs58.encode(dappKeyPair.publicKey),
+        nonce: bs58.encode(nonce),
+        redirect_link: onSignAndSendTransactionRedirectLink,
+        payload: bs58.encode(encryptedPayload),
+      });
+      addLog('Sending transaction...');
+      const url = buildUrl('signAndSendTransaction', params);
 
-    return new Promise((resolve, reject) => {
-      let subscription;
+      return new Promise((resolve, reject) => {
+        let subscription;
 
-      const onReceiveURL = ({url: responseUrl}) => {
-        if (responseUrl.includes(onSignAndSendTransactionRedirectLink)) {
-          cleanup();
-          const urlParams = new URLSearchParams(responseUrl.split('?')[1]);
-          const signedTransaction = urlParams.get('data');
-          if (signedTransaction) {
-            resolve(signedTransaction);
-          } else {
-            reject(new Error('Failed to get signed transaction'));
+        const onReceiveURL = ({url: responseUrl}) => {
+          if (responseUrl.includes(onSignAndSendTransactionRedirectLink)) {
+            cleanup();
+            const urlParams = new URLSearchParams(responseUrl.split('?')[1]);
+            const signedTransaction = urlParams.get('data');
+            if (signedTransaction) {
+              resolve(signedTransaction);
+            } else {
+              reject(new Error('Failed to get signed transaction'));
+            }
           }
-        }
-      };
+        };
 
-      const cleanup = () => {
-        if (subscription) {
-          subscription.remove();
-        }
-      };
+        const cleanup = () => {
+          if (subscription) {
+            subscription.remove();
+          }
+          setSubmitting(false);
+        };
 
-      subscription = Linking.addEventListener('url', onReceiveURL);
-      Linking.openURL(url);
+        subscription = Linking.addEventListener('url', onReceiveURL);
+        Linking.openURL(url);
 
-      // Set a timeout to clean up if we don't get a response
-      const timeoutId = setTimeout(() => {
-        cleanup();
-        reject(new Error('Transaction signing timed out'));
-      }, 60000); // 60 second timeout
+        const timeoutId = setTimeout(() => {
+          cleanup();
+          reject(new Error('Transaction signing timed out'));
+        }, 60000);
 
-      // Modify the promise to clear the timeout on resolution or rejection
-      return {
-        then: (onfulfilled, onrejected) =>
-          Promise.prototype.then.call(
-            promise,
-            result => {
-              clearTimeout(timeoutId);
-              return onfulfilled(result);
-            },
-            error => {
-              clearTimeout(timeoutId);
-              return onrejected(error);
-            },
-          ),
-      };
-    });
+        return {
+          then: (onfulfilled, onrejected) =>
+            Promise.prototype.then.call(
+              promise,
+              result => {
+                clearTimeout(timeoutId);
+                cleanup();
+                return onfulfilled(result);
+              },
+              error => {
+                clearTimeout(timeoutId);
+                cleanup();
+                return onrejected(error);
+              },
+            ),
+        };
+      });
+    } catch (error) {
+      setSubmitting(false);
+      throw error;
+    }
   };
   const signAllTransactions = async () => {
     const transactions = await Promise.all([
@@ -443,29 +451,6 @@ export const WalletContextProvider = ({children}) => {
     }
   };
 
-  const disconnect = async () => {
-    const payload = {
-      session,
-    };
-    const [nonce, encryptedPayload] = encryptPayload(payload, sharedSecret);
-
-    const params = new URLSearchParams({
-      dapp_encryption_public_key: bs58.encode(dappKeyPair.publicKey),
-      nonce: bs58.encode(nonce),
-      redirect_link: onDisconnectRedirectLink,
-      payload: bs58.encode(encryptedPayload),
-    });
-
-    const url = buildUrl('disconnect', params);
-    Linking.openURL(url);
-
-    // Clear the wallet state
-    setPhantomWalletPublicKey(null);
-    setSession(null);
-    setSharedSecret(null);
-    addLog('Disconnected!');
-    navigation.navigate('ConnectWallet'); // Adjust this based on your navigation setup
-  };
 
   const fetchWalletBalance = async () => {
     if (!phantomWalletPublicKey) {
