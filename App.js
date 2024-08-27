@@ -8,23 +8,40 @@ import React from 'react';
 import {SafeAreaView, StatusBar, StyleSheet} from 'react-native';
 import {AuthorizationProvider} from './src/components/providers/AuthorizationProvider';
 import {Header} from './src/components/Header';
-
-import MainScreen from './src/screens/MainScreen';
-import { WalletContextProvider } from './src/hooks/WalletContextProvider';
-import DocumentPage from './src/screens/DocumentPage';
+import {WalletContextProvider} from './src/hooks/WalletContextProvider';
 import DocumentDetail from './src/screens/DocumentDetail';
+import ConnectWallet from './src/screens/ConnectWallet';
+import Home from './src/screens/Home';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import UploadDoc from './src/screens/UploadDoc';
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <WalletContextProvider>
+    <NavigationContainer>
+      <WalletContextProvider>
         <StatusBar translucent backgroundColor={'transparent'} />
-        <SafeAreaView style={styles.shell}>
-          {/* <MainScreen /> */}
+        {/* <SafeAreaView style={styles.shell}> */}
 
-          {/* <DocumentPage/> */}
-          <DocumentDetail/>
-        </SafeAreaView>
-        </WalletContextProvider>
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false,
+          }}
+          initialRouteName="ConnectWallet">
+          <Stack.Screen name="ConnectWallet" component={ConnectWallet} />
+          <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="DocumentDetail" component={DocumentDetail} />
+          <Stack.Screen name="UploadDoc" component={UploadDoc} />
+        </Stack.Navigator>
+        {/* <MainScreen /> */}
+
+        {/* <DocumentPage/> */}
+        {/* <DocumentDetail /> */}
+        {/* </SafeAreaView> */}
+      </WalletContextProvider>
+    </NavigationContainer>
   );
 }
 

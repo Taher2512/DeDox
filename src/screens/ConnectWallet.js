@@ -17,11 +17,12 @@ import {Header} from '../components/Header';
 import UploadModal from '../components/UploadModal';
 import AddUser from '../components/AddUser';
 import usePhantomConnection from '../hooks/WalletContextProvider';
+import EnhancedDarkThemeBackground from './EnhancedDarkThemeBackground';
 
-export default function MainScreen() {
+export default function ConnectWallet() {
   const [balance, setBalance] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
-  const {connect}=usePhantomConnection()
+  const {connect} = usePhantomConnection();
   // const fetchAndUpdateBalance = useCallback(
   //   async account => {
   //     console.log('Fetching balance for: ' + account.publicKey);
@@ -46,34 +47,48 @@ export default function MainScreen() {
   //   // Implement any logic needed after successful upload
   //   console.log('Upload completed successfully');
   // };
-
-  return (
-    <LinearGradient
-      colors={['#0e1111', '#0e1111']}
-      style={styles.mainContainer}>
+  const Children = ({}) => {
+    return (
       <View style={styles.mainContainer}>
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          
+        <View style={styles.mainContainer}>
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
             <>
               <Header />
               <View style={styles.connectButtonContainer}>
-              
-                <TouchableOpacity style={{width:'80%',borderRadius:15,borderWidth:1,borderColor:'white',padding:15}} >
-                  <Text style={{color:"white",fontSize:20,fontWeight:"bold"}} onPress={connect}>Connect</Text>
+                <TouchableOpacity
+                  activeOpacity={0.5}
+                  onPress={connect}
+                  style={{
+                    width: '80%',
+                    borderRadius: 15,
+                    borderWidth: 1,
+                    borderColor: 'white',
+                    padding: 15,
+                    alignItems: 'center',
+                    marginTop: -150,
+                  }}>
+                  <Text
+                    style={{
+                      color: 'white',
+                      fontSize: 20,
+                      fontWeight: 'bold',
+                    }}>
+                    Connect
+                  </Text>
                 </TouchableOpacity>
-                <AddUser/>
+                {/* <AddUser /> */}
               </View>
             </>
-          
-          {/* {selectedAccount && (
+
+            {/* {selectedAccount && (
             <AccountInfo
               selectedAccount={selectedAccount}
               balance={balance}
               fetchAndUpdateBalance={fetchAndUpdateBalance}
             />
           )} */}
-        </ScrollView>
-        {/* {selectedAccount && (
+          </ScrollView>
+          {/* {selectedAccount && (
           <TouchableOpacity
             activeOpacity={0.5}
             style={styles.floatingButton}
@@ -81,17 +96,19 @@ export default function MainScreen() {
             <IconButton icon="plus" size={25} iconColor="#fff" />
           </TouchableOpacity>
         )} */}
-        {/* <UploadModal
+          {/* <UploadModal
           visible={modalVisible}
           hideModal={hideModal}
           onUpload={handleUploadSuccess}
           userWalletAddress={
             selectedAccount ? selectedAccount.publicKey.toBase58() : ''
           } */}
-        {/* /> */}
+          {/* /> */}
+        </View>
       </View>
-    </LinearGradient>
-  );
+    );
+  };
+  return <EnhancedDarkThemeBackground children={<Children />} />;
 }
 
 const styles = StyleSheet.create({

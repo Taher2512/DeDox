@@ -1,10 +1,11 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {LAMPORTS_PER_SOL, PublicKey} from '@solana/web3.js';
 import {StyleSheet, View, Text, ImageBackground} from 'react-native';
-import {Card, Button, useTheme} from 'react-native-paper';
+import {Card, Button, useTheme, ActivityIndicator} from 'react-native-paper';
 import RequestAirdropButton from './RequestAirdropButton';
 import DisconnectButton from './DisconnectButton';
 import LinearGradient from 'react-native-linear-gradient';
+import usePhantomConnection from '../hooks/WalletContextProvider';
 
 function convertLamportsToSOL(lamports) {
   return new Intl.NumberFormat(undefined, {maximumFractionDigits: 1}).format(
@@ -12,12 +13,28 @@ function convertLamportsToSOL(lamports) {
   );
 }
 
-export default function AccountInfo({
-  balance,
-  selectedAccount,
-  fetchAndUpdateBalance,
-}) {
+export default function AccountInfo({publicKey}) {
+  const [balance, setBalance] = useState(null);
+
   const {colors} = useTheme();
+  const {disconnect, requestAirdrop, fetchWalletBalance} =
+    usePhantomConnection();
+
+  const fetchAndUpdateBalance = async () => {
+    const newBalance = await fetchWalletBalance();
+    console.log('New balance:', newBalance);
+
+    setBalance(newBalance);
+  };
+
+  useEffect(() => {
+    fetchAndUpdateBalance();
+  }, [publicKey]); // Fetch balance when publicKey changes
+
+  const handleRequestAirdrop = async () => {
+    await requestAirdrop(publicKey);
+    fetchAndUpdateBalance(); // Fetch updated balance after airdrop
+  };
 
   return (
     <View style={[styles.container]}>
@@ -27,40 +44,28 @@ export default function AccountInfo({
         </Text>
         <View style={styles.walletCard}>
           <ImageBackground
-            source={require('../assets/backgrounds/wallet-bg.jpg')}
+            source={require('../assets/backgrounds/wallet-bg-2.jpg')}
             className="p-5">
-            {/* <Text style={[styles.walletHeader, {color: colors.primary}]}>
-            Wallet Account Info
-          </Text> */}
-
-            {/* <Text style={[styles.walletBalance, {color: colors.onSurface}]}>
-            {selectedAccount.label
-              ? `${selectedAccount.label}: ◎${
-                  balance ? convertLamportsToSOL(balance) : '0'
-                } SOL`
-              : 'Wallet name not found'}
-          </Text> */}
             <View className="mb-10 flex-row justify-between items-center ">
               <Text className="text-white">Wallet Info</Text>
               <View style={styles.buttonGroup}>
-                <DisconnectButton title={'Disconnect'} />
-                <RequestAirdropButton
-                  selectedAccount={selectedAccount}
-                  onAirdropComplete={async account =>
-                    await fetchAndUpdateBalance(account)
-                  }
-                />
+                <DisconnectButton onDisconnect={disconnect} />
+                <RequestAirdropButton onRequestAirdrop={handleRequestAirdrop} />
               </View>
             </View>
             <View>
-              <Text style={[styles.walletBalance]}>
-                {selectedAccount.label
-                  ? `${balance ? convertLamportsToSOL(balance) : '0'} SOL`
-                  : 'Wallet name not found'}
-              </Text>
-              <Text style={[styles.walletNameSubtitle]}>
-                {selectedAccount.address}
-              </Text>
+              {balance !== null ? (
+                <Text style={[styles.walletBalance, {marginTop: 10}]}>
+                  {convertLamportsToSOL(balance)} SOL
+                </Text>
+              ) : (
+                <View className="flex-row items-center" style={{marginTop: 10}}>
+                  <ActivityIndicator color="#fff" size={18} className="mr-3" />
+                  <Text style={[styles.walletBalance]}>SOL</Text>
+                </View>
+              )}
+
+              <Text style={[styles.walletNameSubtitle]}>{publicKey}</Text>
             </View>
           </ImageBackground>
         </View>
@@ -71,12 +76,6 @@ export default function AccountInfo({
 
 const styles = StyleSheet.create({
   container: {
-    // borderRadius: 16,
-    // elevation: 4,
-    // shadowColor: '#000',
-    // shadowOffset: {width: 0, height: 2},
-    // shadowOpacity: 0.1,
-    // shadowRadius: 4,
     marginVertical: 12,
   },
   titleContainer: {
@@ -101,7 +100,6 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     color: '#ddd',
     fontSize: 18,
-    marginTop: 10,
     fontWeight: '600',
   },
   walletNameSubtitle: {
