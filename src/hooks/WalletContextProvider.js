@@ -83,7 +83,8 @@ export const WalletContextProvider = ({children}) => {
   const [deepLink, setDeepLink] = useState('');
   const [logs, setLogs] = useState([]);
   const connection = new Connection(
-    'https://devnet.helius-rpc.com/?api-key=e9bbe608-da76-49e8-a3bc-48d03381b6b3',
+    // 'https://devnet.helius-rpc.com/?api-key=e9bbe608-da76-49e8-a3bc-48d03381b6b3',
+    NETWORK,
     'confirmed',
   );
   const addLog = useCallback(log => setLogs(logs => [...logs, '> ' + log]), []);

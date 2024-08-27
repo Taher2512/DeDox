@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "262048997146",
+    "project_id": "dedox-ead52",
+    "storage_bucket": "dedox-ead52.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:262048997146:android:b39b116c08d0d7242156a3",
+        "android_client_info": {
+          "package_name": "com.dedox"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBoAhIFFvsVg8iDLgLCuD97erWaEeCUyOc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
