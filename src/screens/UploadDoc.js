@@ -1,3 +1,4 @@
+/*eslint-disable*/
 import React, {useEffect, useState, useMemo, useCallback} from 'react';
 import {
   Image,
@@ -19,6 +20,8 @@ import axios from 'axios';
 import {launchImageLibrary} from 'react-native-image-picker';
 import EnhancedDarkThemeBackground from './EnhancedDarkThemeBackground';
 import {useNavigation} from '@react-navigation/native';
+import AddDocumentButton from '../components/AddDocumentButton';
+import { jsiConfigureProps } from 'react-native-reanimated/lib/typescript/core';
 
 const WalletAddressInput = React.memo(
   ({
@@ -176,6 +179,7 @@ const UploadDoc = ({route}) => {
           'Document Uploaded Successfully!',
           ToastAndroid.SHORT,
         );
+
         setTimeout(() => {
           navigation.navigate('Home', {publicKey: publicKey});
         }, 1000);
@@ -242,6 +246,7 @@ const UploadDoc = ({route}) => {
           style={[styles.button, {borderColor: '#fff', borderWidth: 0.4}]}>
           {uploading ? 'Uploading...' : 'Upload'}
         </Button>
+        <AddDocumentButton signers={walletAddresses} docId={23} imageHash={"QmdYBWMaj1uHiYiMnq4CRi5dAX7d6pVGXCPGGfD8BY1HXV"} textStyle={{color:'white',fontSize:15}} style={{width:"100%",backgroundColor:'black',padding:15,borderRadius:15,borderWidth:0.6,borderColor:"white",justifyContent:'center',alignItems:'center'}}></AddDocumentButton>
       </ScrollView>
     );
   }, [

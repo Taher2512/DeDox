@@ -5,7 +5,7 @@ import idl from "../../contracts/idl/idl.json"
 import { Connection, PublicKey, SystemProgram, Transaction,  } from "@solana/web3.js";
 import { Program, BN } from "@project-serum/anchor";
 const programID = new PublicKey('2ooqk3QB9KVqcwKE8EnxDNoUnTAMfTH43qmqtMA1T1zk');
-const CONNECTION = new Connection('https://devnet.helius-rpc.com/?api-key=e9bbe608-da76-49e8-a3bc-48d03381b6b3', 'confirmed');
+const CONNECTION = new Connection('https://devnet.helius-rpc.com/?api-key=71ac2476-6792-470c-8bf1-85fc9e701bc3', 'confirmed');
 import usePhantomConnection from '../hooks/WalletContextProvider';
 export default function AddDocumentButton({imageHash,docPDA,docId,signers,style,textStyle}) {
     const {
@@ -72,7 +72,7 @@ export default function AddDocumentButton({imageHash,docPDA,docId,signers,style,
       }
   return (
     <TouchableOpacity onPress={sendDocument} style={style}>
-     <Text style={textStyle}>Upload Document</Text>
+     <Text style={textStyle}>Upload document to blockchain</Text>
     </TouchableOpacity>
   )
 }

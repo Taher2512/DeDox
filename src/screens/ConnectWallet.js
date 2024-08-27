@@ -18,35 +18,17 @@ import UploadModal from '../components/UploadModal';
 import AddUser from '../components/AddUser';
 import usePhantomConnection from '../hooks/WalletContextProvider';
 import EnhancedDarkThemeBackground from './EnhancedDarkThemeBackground';
-
+import { useNavigation } from '@react-navigation/native';
 export default function ConnectWallet() {
   const [balance, setBalance] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
-  const {connect} = usePhantomConnection();
-  // const fetchAndUpdateBalance = useCallback(
-  //   async account => {
-  //     console.log('Fetching balance for: ' + account.publicKey);
-  //     const fetchedBalance = await connection.getBalance(account.publicKey);
-  //     console.log('Balance fetched: ' + fetchedBalance);
-  //     setBalance(fetchedBalance);
-  //   },
-  //   [connection],
-  // );
-
-  // useEffect(() => {
-  //   if (!selectedAccount) {
-  //     return;
-  //   }
-  //   fetchAndUpdateBalance(selectedAccount);
-  // }, [fetchAndUpdateBalance, selectedAccount]);
-
-  // const showModal = () => setModalVisible(true);
-  // const hideModal = () => setModalVisible(false);
-
-  // const handleUploadSuccess = () => {
-  //   // Implement any logic needed after successful upload
-  //   console.log('Upload completed successfully');
-  // };
+  const {connect,phantomWalletPublicKey} = usePhantomConnection();
+  const navigation=useNavigation()
+  useEffect(() => {
+   if(phantomWalletPublicKey){
+    navigation.navigate('Home',{publicKey:phantomWalletPublicKey.toString()})
+   }
+  }, [phantomWalletPublicKey])
   const Children = ({}) => {
     return (
       <View style={styles.mainContainer}>

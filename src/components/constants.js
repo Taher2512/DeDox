@@ -5,7 +5,7 @@ import usePhantomConnection from "../hooks/WalletContextProvider";
 import DocumentDetail from "../screens/DocumentDetail";
 import { BN } from "@project-serum/anchor";
 
-const CONNECTION = new Connection('https://devnet.helius-rpc.com/?api-key=e9bbe608-da76-49e8-a3bc-48d03381b6b3', 'confirmed');
+const CONNECTION = new Connection('https://devnet.helius-rpc.com/?api-key=71ac2476-6792-470c-8bf1-85fc9e701bc3', 'confirmed');
 const programId="2ooqk3QB9KVqcwKE8EnxDNoUnTAMfTH43qmqtMA1T1zk"
 
 const getUserPDA=async(pubKey)=>{
@@ -23,4 +23,5 @@ const getDocSignedPDA=async(pubKey,docId)=>{
       );    
       return documentPDA
 }
-export { CONNECTION,programId,getUserPDA,getDocSignedPDA };
+const imageURI="https://aquamarine-rare-gopher-724.mypinata.cloud/ipfs/"
+export { CONNECTION,programId,getUserPDA,getDocSignedPDA,imageURI };
