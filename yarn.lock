@@ -3014,6 +3014,9 @@
     "@project-serum/anchor" "^0.26.0"
     "@project-serum/borsh" "^0.2.5"
     "@react-native-clipboard/clipboard" "^1.14.1"
+    "@react-native-firebase/app" "^20.4.0"
+    "@react-native-firebase/auth" "^20.4.0"
+    "@react-native-firebase/firestore" "^20.4.0"
     "@react-navigation/native" "^6.1.18"
     "@react-navigation/native-stack" "^6.11.0"
     "@solana-mobile/mobile-wallet-adapter-protocol" "^2.1.3"
@@ -3021,11 +3024,7 @@
     "@solana/wallet-adapter-base" "^0.9.20"
     "@solana/wallet-adapter-react" "^0.15.28"
     "@solana/web3.js" "^1.48.0"
-<<<<<<< HEAD
-    DeDox "file:../../../../AppData/Local/Yarn/Cache/v6/npm-e-ox-0.0.1-b4a24485-ca59-4429-8f88-50d1cbfe5633-1724744272499/node_modules/DeDox"
-=======
-    DeDox "file:../AppData/Local/Yarn/Cache/v6/npm-e-ox-0.0.1-880e75f9-933e-4dd4-a164-b93f99fece86-1724735587847/node_modules/DeDox"
->>>>>>> 90fc5908051d6471c732c7d69c589d4c6887f329
+    DeDox "file:../AppData/Local/Yarn/Cache/v6/npm-e-ox-0.0.1-430256dd-9c1f-48c1-b21e-2c180853d92c-1724776745625/node_modules/DeDox"
     assert "^2.0.0"
     axios "^1.7.4"
     base-x "^5.0.0"

@@ -48,7 +48,9 @@ export default function AddUser() {
     
         initializeWallet();
       }, []);
-   
+   useEffect(()=>{
+    
+   })
 const addUser = async () => {
   if (!phantomWalletPublicKey) {
     Alert.alert('Error', 'Wallet not connected');

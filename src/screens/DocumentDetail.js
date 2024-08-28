@@ -11,6 +11,7 @@ import {
   ScrollView,
   Dimensions,
   ToastAndroid,
+  Alert,
 } from 'react-native';
 import EnhancedDarkThemeBackground from './EnhancedDarkThemeBackground';
 import {
@@ -33,16 +34,16 @@ import {
   CONNECTION,
   getDocSignedPDA,
   getUserPDA,
+  imageURI,
   programId,
 } from '../components/constants';
 import {BN, Program} from '@project-serum/anchor';
 import idl from '../../contracts/idl/idl.json';
-import {set} from '@project-serum/anchor/dist/cjs/utils/features';
 
-export default function DocumentDetail({docPDA}) {
+export default function DocumentDetail({navigation,route}) {
   const {phantomWalletPublicKey, signAllTransactions, signAndSendTransaction} =
     usePhantomConnection();
-
+  
   const pubKey = new PublicKey(phantomWalletPublicKey);
   const customProvider = {
     publicKey: pubKey,
@@ -50,49 +51,73 @@ export default function DocumentDetail({docPDA}) {
     signAllTransactions: signAllTransactions,
     connection: CONNECTION,
   };
-  const program = new Program(idl, programId, customProvider);
-  const [docId, setdocId] = useState(null);
-  const [signers, setsigners] = useState([]);
-  const [uploader, setuploader] = useState(null);
-  const [imageUrl, setimageUrl] = useState(null);
+  const program = new Program(idl, programId.toString(), customProvider);
+  const [docId, setdocId] = useState(route.params.docId);
+  const [signers, setsigners] = useState();
+  const [uploader, setuploader] = useState('');
+  const [imageUrl, setimageUrl] = useState(route.params.imageUri);
   useEffect(() => {
     // Fetch the document details from the blockchain
     fetchDocumentDetails();
-  });
+  },[]);
   const fetchDocumentDetails = async () => {
-    const data = await program.account.document.fetch(docPDA);
-    setimageUrl(data.imageHash.toString());
-    const uploader = data.uploader.toString();
-    const docId = data.docId.toNumber();
-    const docSigners = data.signers.map(signer => signer.toString());
-    setdocId(docId);
-    const uploaderPDA = await getUserPDA(new PublicKey(uploader));
-    const uploaderData = await program.account.user.fetch(uploaderPDA);
-    setuploader(uploaderData);
-    const signerArray = [];
-    for (let i = 0; i < docSigners.length; i++) {
-      const signerPDA = await getUserPDA(new PublicKey(docSigners[i]));
-      const signerData = await program.account.user.fetch(signerPDA);
-      console.log('Signer data fetched:', signerData);
-      const signedDocPDA = await getDocSignedPDA(
-        new PublicKey(docSigners[i]),
-        docId,
-      );
-      const signedDocData = await program.account.signedDocument.fetch(
-        signedDocPDA,
-      );
-      let signed = false;
-      if (signedDocData) {
-        signed = true;
+    try {
+      const uploaderPDA = await getUserPDA(new PublicKey(route.params.uploader));
+      const uploaderData = await program.account.userPhoto.fetch(uploaderPDA);
+      setuploader({user: route.params.uploader, imageUrl: imageURI+"QmdYBWMaj1uHiYiMnq4CRi5dAX7d6pVGXCPGGfD8BY1HXV"});
+      
+      const signerArray = [];
+      const signers1 = route.params.signers.split(',');
+      console.log('Signers:', signers1);
+      
+      for (let i = 0; i < signers1.length; i++) {
+        try {
+          const signerPDA = await getUserPDA(new PublicKey(signers1[i]));
+          const signerData = await program.account.userPhoto.fetch(signerPDA);
+          console.log('Signer data fetched:', signerData);
+  
+          let signed = false;
+          let signedDocData = null;
+  
+          try {
+            const signedDocPDA = await getDocSignedPDA(
+              new PublicKey(signers1[i]),
+              docId,
+            );
+            signedDocData = await program.account.signedDocument.fetch(
+              signedDocPDA
+            );
+            console.log('Signed document data:', signedDocData);
+            signed = true;
+          } catch (docError) {
+            console.log('Document not signed:', docError.message);
+            // Not throwing the error, just logging it
+          }
+  
+          const signerInfo = {
+            signed,
+            user: signers1[i].toString(),
+            imageUrl: signerData.imageHash.toString(),
+          };
+          signerArray.push(signerInfo);
+        } catch (signerError) {
+          console.error('Error fetching signer data:', signerError.message);
+          // You might want to add some default or error state for this signer
+          signerArray.push({
+            signed: false,
+            user: signers1[i].toString(),
+            imageUrl: 'default_image_url', // Use a default image URL
+            error: true,
+          });
+        }
       }
-      signerData = {
-        signed,
-        user: docSigners[i],
-        imageUrl: signerData.imageHash.toString(),
-      };
-      signerArray.push(signerData);
+      
+      console.log(signerArray);
+      setsigners(signerArray);
+    } catch (error) {
+      console.error('Error in fetchDocumentDetails:', error);
+      // Handle the overall error, maybe set an error state or show an alert
     }
-    setsigners(signerArray);
   };
   const signDocument = async () => {
     if (!phantomWalletPublicKey) {
@@ -167,9 +192,7 @@ export default function DocumentDetail({docPDA}) {
     const v1 = useSharedValue(0);
     const v2 = useSharedValue(1);
     const translateX = useSharedValue(0);
-    const signDocument = async () => {
-      console.log('Document signed');
-    };
+    
     const gestureHandler = useAnimatedGestureHandler({
       onStart: (_, context) => {
         context.startX = translateX.value;
@@ -190,7 +213,7 @@ export default function DocumentDetail({docPDA}) {
         }
       },
     });
-
+    
     const animationstyle = useAnimatedStyle(() => {
       return {
         transform: [{rotate: `${v1.value}deg`}],
@@ -324,7 +347,7 @@ export default function DocumentDetail({docPDA}) {
               }}>
               <Image
                 style={{height: 80, width: 80, borderRadius: 15}}
-                source={{uri: uploader.imageHash}}
+                source={{uri: uploader.imageUrl}}
               />
               <View
                 style={{
@@ -388,7 +411,7 @@ export default function DocumentDetail({docPDA}) {
                         alignItems: 'center',
                       }}>
                       <Text style={{color: 'white', fontSize: 16}}>
-                        Address: {item.user.substring(0, 4)}....
+                        Address: {item.user.toString().substring(0, 4)}....
                         {item.user.substring(
                           item.user.length - 4,
                           item.user.length,
@@ -476,8 +499,7 @@ export default function DocumentDetail({docPDA}) {
               Please read the document carefully before signing
             </Text>
           </View>
-          {signers.filter(item => item.user.toString() === pubKey.toString())[0]
-            .signed && (
+          {signers&& (
             <GestureHandlerRootView>
               <View
                 style={{

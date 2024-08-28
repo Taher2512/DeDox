@@ -9,10 +9,11 @@ import {
   ToastAndroid,
   TouchableOpacity,
   View,
+  Text
 } from 'react-native';
 import EnhancedDarkThemeBackground from './EnhancedDarkThemeBackground';
 import AccountInfo from '../components/AccountInfo';
-import {IconButton} from 'react-native-paper';
+import {ActivityIndicator, IconButton} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
 import { CONNECTION, getUserPDA, imageURI } from '../components/constants';
 import usePhantomConnection from '../hooks/WalletContextProvider';
@@ -21,6 +22,7 @@ import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 import idl from "../../contracts/idl/idl.json"
 import { launchCamera } from 'react-native-image-picker';
 import axios from 'axios';
+import firestore from '@react-native-firebase/firestore';
 
 export default function Home({route}) {
   const {width, height} = Dimensions.get('window');
@@ -28,10 +30,42 @@ export default function Home({route}) {
   const {signAndSendTransaction,signAllTransactions,phantomWalletPublicKey}=usePhantomConnection()
   const navigation = useNavigation();
   const [loggedin, setloggedin] = useState(false)
+  const [documents, setdocuments] = useState(null)
+  const customProvider={
+    publicKey:new PublicKey(phantomWalletPublicKey),
+    signTransaction:signAndSendTransaction,
+    signAllTransactions:signAllTransactions,
+    connection:CONNECTION
+  }
+  
+ const program=new Program(idl,"2ooqk3QB9KVqcwKE8EnxDNoUnTAMfTH43qmqtMA1T1zk",customProvider)
   useEffect(() => {
      checkUser()
   }, [])
-  
+  useEffect(()=>{
+     if(loggedin){
+       getDocs()
+     }
+  },[loggedin])
+  const getDocs=async()=>{
+     const docs=await firestore().collection('documents').get()
+     console.log(docs.docs.length)
+     const docPDAs=docs.docs.map((doc)=>new PublicKey(doc.data().documentPDA))
+     console.log(docPDAs)
+     console.log(docs.docs[0].data().documentPDA)
+     const arr=[]
+     const detaildocs=await program.account.document.fetchMultiple(docPDAs)
+     console.log(detaildocs)
+     let i=0
+     detaildocs.forEach((doc)=>{
+       if(doc.signers.toString().includes(phantomWalletPublicKey.toString())){
+          arr.push({...doc})
+       }
+       i++;
+     }) 
+     setdocuments(arr) 
+
+  }
   const checkUser=async(pubKey)=>{
     const program=new Program(idl,"2ooqk3QB9KVqcwKE8EnxDNoUnTAMfTH43qmqtMA1T1zk",{
       publicKey:new PublicKey(phantomWalletPublicKey),
@@ -113,9 +147,12 @@ export default function Home({route}) {
     
    }
   const Children = ({}) => {
-    const data = [1, 2, 3, 4];
     return (
       <>
+      {!loggedin&&<View style={{flex:1,alignItems:'center',justifyContent:"center"}}>
+          <ActivityIndicator size="large" color="white" />
+          <Text style={{fontSize:15,fontWeight:'bold',color:'white'}}>Uploading user data on blockchain...</Text>
+      </View>}
       {loggedin&&<View
         style={{
           paddingTop: StatusBar.currentHeight + 20,
@@ -138,8 +175,8 @@ export default function Home({route}) {
           <IconButton icon="plus" size={25} iconColor="#fff" />
         </TouchableOpacity>
         <AccountInfo publicKey={publicKey} />
-        <FlatList
-          data={data}
+       {documents&&<FlatList
+          data={documents}
           numColumns={3}
           keyExtractor={item => item.toString()}
           ItemSeparatorComponent={() => <View style={{height: 20}} />}
@@ -153,7 +190,7 @@ export default function Home({route}) {
               <TouchableOpacity
                 activeOpacity={0.7}
                 onPress={() =>
-                  navigation.navigate('DocumentDetail', {publicKey})
+                  navigation.navigate('DocumentDetail', {imageUri:imageURI+item.imageHash,signers:item.signers.toString(),uploader:item.uploader.toString(),docId:item.id.toString()})
                 }
                 style={{
                   height: 150,
@@ -162,7 +199,7 @@ export default function Home({route}) {
                   borderRadius: 20,
                 }}>
                 <Image
-                  source={require('../assets/dummyimg.jpg')}
+                  source={{uri:imageURI+item.imageHash}}
                   style={{
                     height: '100%',
                     width: '100%',
@@ -173,7 +210,7 @@ export default function Home({route}) {
               </TouchableOpacity>
             );
           }}
-        />
+        />}
       </View>}
       </>
     );
