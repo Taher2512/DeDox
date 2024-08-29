@@ -520,7 +520,7 @@ export default function DocumentDetail({navigation,route}) {
                     style={{
                       width: 300,
                       height: 65,
-                      backgroundColor: '#333',
+                      backgroundColor: '#1e1c1d',
                       borderRadius: 5,
                       padding: 5,
                       flexDirection: 'row',
