@@ -20,7 +20,7 @@ import {CONNECTION} from '../components/constants';
 import firestore from '@react-native-firebase/firestore';
 import usePhantomConnection from '../hooks/WalletContextProvider';
 
-const programId = new PublicKey('2ooqk3QB9KVqcwKE8EnxDNoUnTAMfTH43qmqtMA1T1zk');
+const programId = new PublicKey('Ch57PUCAvh6SCZ3DNroq7gXH9a1svdkykVabscVxdsEC');
 
 const WalletAddressInput = React.memo(({address, index, addressError}) => {
   return (
@@ -143,7 +143,7 @@ const UploadDoc = ({route}) => {
         console.log('reached here', pubKey);
         const program = new Program(
           idl,
-          '2ooqk3QB9KVqcwKE8EnxDNoUnTAMfTH43qmqtMA1T1zk',
+          'Ch57PUCAvh6SCZ3DNroq7gXH9a1svdkykVabscVxdsEC',
           customProvider,
         );
         const tx = await program.methods

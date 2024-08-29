@@ -159,7 +159,7 @@ export default function DocumentDetail({navigation, route}) {
       console.log('reached here', pubKey);
       const program = new Program(
         idl,
-        '2ooqk3QB9KVqcwKE8EnxDNoUnTAMfTH43qmqtMA1T1zk',
+        'Ch57PUCAvh6SCZ3DNroq7gXH9a1svdkykVabscVxdsEC',
         customProvider,
       );
       const tx = await program.methods
@@ -195,7 +195,8 @@ export default function DocumentDetail({navigation, route}) {
   const Children = () => {
     const ImageComponent = Animated.createAnimatedComponent(Image);
     const [visible, setvisible] = useState(false);
-    const address = '2ooqk3QB9KVqcwKE8EnxDNoUnTAMfTH43qmqtMA1T1zk';
+    // const address = '2ooqk3QB9KVqcwKE8EnxDNoUnTAMfTH43qmqtMA1T1zk';
+    const address = 'Ch57PUCAvh6SCZ3DNroq7gXH9a1svdkykVabscVxdsEC';
     const x = useSharedValue(0);
     const y = useSharedValue(0);
     const width = Dimensions.get('screen').width;

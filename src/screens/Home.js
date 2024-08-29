@@ -43,7 +43,7 @@ export default function Home({route}) {
 
   const program = new Program(
     idl,
-    '2ooqk3QB9KVqcwKE8EnxDNoUnTAMfTH43qmqtMA1T1zk',
+    'Ch57PUCAvh6SCZ3DNroq7gXH9a1svdkykVabscVxdsEC',
     customProvider,
   );
 
@@ -86,7 +86,8 @@ export default function Home({route}) {
   const checkUser = async pubKey => {
     const program = new Program(
       idl,
-      '2ooqk3QB9KVqcwKE8EnxDNoUnTAMfTH43qmqtMA1T1zk',
+      'Ch57PUCAvh6SCZ3DNroq7gXH9a1svdkykVabscVxdsEC',
+      // '2ooqk3QB9KVqcwKE8EnxDNoUnTAMfTH43qmqtMA1T1zk',
       {
         publicKey: new PublicKey(phantomWalletPublicKey),
         signTransaction: signAndSendTransaction,

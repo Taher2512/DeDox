@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("2ooqk3QB9KVqcwKE8EnxDNoUnTAMfTH43qmqtMA1T1zk");
+declare_id!("Ch57PUCAvh6SCZ3DNroq7gXH9a1svdkykVabscVxdsEC");
 
 #[program]
 pub mod document_storage {

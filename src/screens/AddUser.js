@@ -45,7 +45,7 @@ export default function AddUser({route}) {
 
   const program = new Program(
     idl,
-    '2ooqk3QB9KVqcwKE8EnxDNoUnTAMfTH43qmqtMA1T1zk',
+    'Ch57PUCAvh6SCZ3DNroq7gXH9a1svdkykVabscVxdsEC',
     customProvider,
   );
 
