@@ -1,9 +1,9 @@
 /*eslint-disable*/
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import {View, StyleSheet} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 
-const RefinedDarkBackground = ({ children }) => {
+const RefinedDarkBackground = ({children}) => {
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'transparent',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 0 },
+    shadowOffset: {width: 0, height: 0},
     shadowOpacity: 0.8,
     shadowRadius: 150,
     elevation: 8,

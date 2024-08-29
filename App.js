@@ -16,6 +16,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import UploadDoc from './src/screens/UploadDoc';
 import AddUser from './src/screens/AddUser';
+import AddImage from './src/screens/AddImage';
 // import AddUser from './src/components/AddUser';
 
 const Stack = createNativeStackNavigator();
@@ -35,13 +36,10 @@ export default function App() {
           <Stack.Screen name="ConnectWallet" component={ConnectWallet} />
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="DocumentDetail" component={DocumentDetail} />
-          <Stack.Screen name="UploadDoc" component={AddUser} />
+          <Stack.Screen name="AddImage" component={AddImage} />
+          <Stack.Screen name="AddUser" component={AddUser} />
+          <Stack.Screen name="UploadDoc" component={UploadDoc} />
         </Stack.Navigator>
-        {/* <MainScreen /> */}
-
-        {/* <DocumentPage/> */}
-        {/* <DocumentDetail /> */}
-        {/* </SafeAreaView> */}
       </WalletContextProvider>
     </NavigationContainer>
   );
