@@ -15,6 +15,8 @@ import Home from './src/screens/Home';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import UploadDoc from './src/screens/UploadDoc';
+import AddUser from './src/screens/AddUser';
+// import AddUser from './src/components/AddUser';
 
 const Stack = createNativeStackNavigator();
 
@@ -33,7 +35,7 @@ export default function App() {
           <Stack.Screen name="ConnectWallet" component={ConnectWallet} />
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="DocumentDetail" component={DocumentDetail} />
-          <Stack.Screen name="UploadDoc" component={UploadDoc} />
+          <Stack.Screen name="UploadDoc" component={AddUser} />
         </Stack.Navigator>
         {/* <MainScreen /> */}
 

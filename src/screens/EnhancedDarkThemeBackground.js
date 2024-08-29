@@ -3,17 +3,17 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 
-const GradientBackground = ({ children }) => {
+const RefinedDarkBackground = ({ children }) => {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#1a2a6c', '#2a4858', '#141E30']}
+        colors={['#121212', '#1E1E1E', '#121212']}
+        style={StyleSheet.absoluteFillObject}
         start={{x: 0, y: 0}}
         end={{x: 1, y: 1}}
-        style={styles.gradient}
-      >
-        {children}
-      </LinearGradient>
+      />
+      <View style={styles.vignette} />
+      {children}
     </View>
   );
 };
@@ -22,9 +22,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  gradient: {
-    flex: 1,
+  vignette: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'transparent',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 150,
+    elevation: 8,
   },
 });
 
-export default GradientBackground;
+export default RefinedDarkBackground;
