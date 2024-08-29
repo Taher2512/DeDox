@@ -189,9 +189,20 @@ export default function Home({route}) {
       <>
         {!loggedin && (
           <View
-            style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-            <ActivityIndicator size="large" color="white" />
-            <Text style={{fontSize: 15, fontWeight: 'bold', color: 'white'}}>
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <ActivityIndicator size="small" color="white" />
+            <Text
+              style={{
+                fontSize: 17,
+                fontWeight: 'bold',
+                color: 'white',
+                marginLeft: 14,
+              }}>
               Uploading user data on blockchain...
             </Text>
           </View>
@@ -261,6 +272,12 @@ export default function Home({route}) {
                     </TouchableOpacity>
                   );
                 }}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                  />
+                }
               />
             )}
           </View>

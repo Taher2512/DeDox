@@ -71,7 +71,7 @@ const AddImage = ({route}) => {
         <Button
           icon="arrow-right"
           mode="contained"
-          className="bg-transparent w-full absolute bottom-8"
+          className="bg-transparent w-full absolute bottom-8 self-center"
           style={{borderColor: '#fff', borderWidth: 0.4}}
           contentStyle={{
             flexDirection: 'row-reverse',

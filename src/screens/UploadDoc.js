@@ -216,7 +216,7 @@ const UploadDoc = ({route}) => {
           marginTop: StatusBar.currentHeight + 20,
           padding: 20,
           minHeight: '100%',
-          paddingBottom: 100,
+          paddingBottom: 150,
         }}>
         {imageUri && (
           <View>
@@ -246,6 +246,21 @@ const UploadDoc = ({route}) => {
           style={[styles.button, {borderColor: '#fff', borderWidth: 0.4}]}>
           {uploading ? 'Uploading...' : 'Upload to IPFS and Solana'}
         </Button>
+        <Button
+          icon="arrow-left"
+          mode="contained"
+          className="bg-transparent w-full absolute bottom-20 self-center"
+          style={{borderColor: '#fff', borderWidth: 0.4}}
+          labelStyle={{fontSize: 17}}
+          onPress={() => {
+            if (imageUri) {
+              navigation.navigate('AddUser', {imageUri, publicKey});
+            } else {
+              setShowError(true);
+            }
+          }}>
+          BACK
+        </Button>
       </ScrollView>
     );
   }, [imageUri, walletAddresses, addressErrors, uploading, handleUpload]);
@@ -264,6 +279,9 @@ const styles = StyleSheet.create({
   },
   button: {
     marginVertical: 8,
+    backgroundColor: 'transparent',
+    borderWidth: 0.4,
+    borderColor: '#fff',
   },
   inputContainer: {
     marginBottom: 8,

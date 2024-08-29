@@ -39,11 +39,16 @@ import {
 } from '../components/constants';
 import {BN, Program} from '@project-serum/anchor';
 import idl from '../../contracts/idl/idl.json';
+import {Icon, IconButton} from 'react-native-paper';
 
-export default function DocumentDetail({navigation,route}) {
+export default function DocumentDetail({navigation, route}) {
+  const [docId, setdocId] = useState(route.params.docId);
+  const [signers, setsigners] = useState();
+  const [uploader, setuploader] = useState('');
+  const [imageUrl, setimageUrl] = useState(route.params.imageUri);
+
   const {phantomWalletPublicKey, signAllTransactions, signAndSendTransaction} =
     usePhantomConnection();
-  
   const pubKey = new PublicKey(phantomWalletPublicKey);
   const customProvider = {
     publicKey: pubKey,
@@ -52,40 +57,43 @@ export default function DocumentDetail({navigation,route}) {
     connection: CONNECTION,
   };
   const program = new Program(idl, programId.toString(), customProvider);
-  const [docId, setdocId] = useState(route.params.docId);
-  const [signers, setsigners] = useState();
-  const [uploader, setuploader] = useState('');
-  const [imageUrl, setimageUrl] = useState(route.params.imageUri);
+
   useEffect(() => {
     // Fetch the document details from the blockchain
     fetchDocumentDetails();
-  },[]);
+  }, []);
+
   const fetchDocumentDetails = async () => {
     try {
-      const uploaderPDA = await getUserPDA(new PublicKey(route.params.uploader));
+      const uploaderPDA = await getUserPDA(
+        new PublicKey(route.params.uploader),
+      );
       const uploaderData = await program.account.userPhoto.fetch(uploaderPDA);
-      setuploader({user: route.params.uploader, imageUrl: imageURI+"QmdYBWMaj1uHiYiMnq4CRi5dAX7d6pVGXCPGGfD8BY1HXV"});
-      
+      setuploader({
+        user: route.params.uploader,
+        imageUrl: imageURI + 'QmdYBWMaj1uHiYiMnq4CRi5dAX7d6pVGXCPGGfD8BY1HXV',
+      });
+
       const signerArray = [];
       const signers1 = route.params.signers.split(',');
       console.log('Signers:', signers1);
-      
+
       for (let i = 0; i < signers1.length; i++) {
         try {
           const signerPDA = await getUserPDA(new PublicKey(signers1[i]));
           const signerData = await program.account.userPhoto.fetch(signerPDA);
           console.log('Signer data fetched:', signerData);
-  
+
           let signed = false;
           let signedDocData = null;
-  
+
           try {
             const signedDocPDA = await getDocSignedPDA(
               new PublicKey(signers1[i]),
               docId,
             );
             signedDocData = await program.account.signedDocument.fetch(
-              signedDocPDA
+              signedDocPDA,
             );
             console.log('Signed document data:', signedDocData);
             signed = true;
@@ -93,7 +101,7 @@ export default function DocumentDetail({navigation,route}) {
             console.log('Document not signed:', docError.message);
             // Not throwing the error, just logging it
           }
-  
+
           const signerInfo = {
             signed,
             user: signers1[i].toString(),
@@ -111,7 +119,7 @@ export default function DocumentDetail({navigation,route}) {
           });
         }
       }
-      
+
       console.log(signerArray);
       setsigners(signerArray);
     } catch (error) {
@@ -119,6 +127,7 @@ export default function DocumentDetail({navigation,route}) {
       // Handle the overall error, maybe set an error state or show an alert
     }
   };
+
   const signDocument = async () => {
     if (!phantomWalletPublicKey) {
       Alert.alert('Error', 'Wallet not connected');
@@ -182,6 +191,7 @@ export default function DocumentDetail({navigation,route}) {
       Alert.alert('Error', 'Failed to prepare transaction: ' + error.message);
     }
   };
+
   const Children = () => {
     const ImageComponent = Animated.createAnimatedComponent(Image);
     const [visible, setvisible] = useState(false);
@@ -192,7 +202,7 @@ export default function DocumentDetail({navigation,route}) {
     const v1 = useSharedValue(0);
     const v2 = useSharedValue(1);
     const translateX = useSharedValue(0);
-    
+
     const gestureHandler = useAnimatedGestureHandler({
       onStart: (_, context) => {
         context.startX = translateX.value;
@@ -213,7 +223,7 @@ export default function DocumentDetail({navigation,route}) {
         }
       },
     });
-    
+
     const animationstyle = useAnimatedStyle(() => {
       return {
         transform: [{rotate: `${v1.value}deg`}],
@@ -245,6 +255,7 @@ export default function DocumentDetail({navigation,route}) {
         opacity: v2.value,
       };
     });
+
     return (
       <ScrollView
         style={{
@@ -257,6 +268,14 @@ export default function DocumentDetail({navigation,route}) {
             visible={visible}
             transparent
             style={{paddingTop: StatusBar.currentHeight + 20}}>
+            <IconButton
+              icon="close"
+              size={30}
+              iconColor="#fff"
+              onPress={() => {
+                setvisible(false);
+              }}
+            />
             <View
               style={{
                 flex: 1,
@@ -265,23 +284,6 @@ export default function DocumentDetail({navigation,route}) {
                 justifyContent: 'center',
                 padding: 20,
               }}>
-              <View
-                style={{
-                  width: '100%',
-                  alignItems: 'flex-end',
-                  justifyContent: 'flex-end',
-                }}>
-                <TouchableOpacity
-                  onPress={() => {
-                    setvisible(false);
-                  }}>
-                  <Image
-                    tintColor={'white'}
-                    style={{height: 30, width: 30}}
-                    source={require('../assets/backgrounds/cross.png')}
-                  />
-                </TouchableOpacity>
-              </View>
               <Image
                 style={{width: '100%', height: '90%', resizeMode: 'stretch'}}
                 source={{uri: imageUrl}}
@@ -296,32 +298,45 @@ export default function DocumentDetail({navigation,route}) {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <TouchableOpacity
-              onPress={() => {
-                setvisible(true);
-              }}
+            <View
               style={{
                 position: 'absolute',
                 zIndex: 2,
-                borderWidth: 1,
-                borderColor: 'white',
-                width: 200,
-                height: 50,
-                borderRadius: 20,
-                flexDirection: 'row',
+                height: 350,
+                width: 250,
+                borderRadius: 25,
+                backgroundColor: 'rgba(0,0,0,0.6)',
+                justifyContent: 'center',
                 alignItems: 'center',
-                justifyContent: 'space-around',
-                paddingVertical: 15,
               }}>
-              <Image
-                source={require('../assets/backgrounds/eye.png')}
-                tintColor={'white'}
-                style={{height: 40, width: 40}}
-              />
-              <Text style={{color: 'white', fontSize: 16, fontWeight: 'bold'}}>
-                View Document
-              </Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  setvisible(true);
+                }}
+                style={{
+                  position: 'absolute',
+                  zIndex: 3,
+                  borderWidth: 1,
+                  borderColor: 'white',
+                  width: 200,
+                  borderRadius: 20,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  paddingVertical: 15,
+                }}>
+                <Icon source="eye" color="white" size={27} />
+                <Text
+                  style={{
+                    color: 'white',
+                    fontSize: 16,
+                    fontWeight: 'bold',
+                    marginLeft: 15,
+                  }}>
+                  View Document
+                </Text>
+              </TouchableOpacity>
+            </View>
             <ImageBackground
               source={{uri: imageUrl}}
               resizeMode="cover"
@@ -330,14 +345,12 @@ export default function DocumentDetail({navigation,route}) {
                 width: 250,
                 borderRadius: 25,
                 overflow: 'hidden',
-                opacity: 0.4,
+                opacity: 1,
               }}></ImageBackground>
           </View>
         )}
         <View style={{flex: 1, width: '100%', gap: 10, marginTop: 20}}>
-          <Text style={{color: 'white', fontSize: 22, fontWeight: 'bold'}}>
-            Uploader
-          </Text>
+          <Text style={{color: 'white', fontSize: 18}}>Uploader:</Text>
           {uploader && (
             <View
               style={{
@@ -378,9 +391,7 @@ export default function DocumentDetail({navigation,route}) {
               </View>
             </View>
           )}
-          <Text style={{color: 'white', fontSize: 22, fontWeight: 'bold'}}>
-            Signers
-          </Text>
+          <Text style={{color: 'white', fontSize: 18}}>Signers:</Text>
           {signers &&
             signers.map((item, index) => {
               return (
@@ -440,13 +451,13 @@ export default function DocumentDetail({navigation,route}) {
                           width: 100,
                           alignItems: 'center',
                           justifyContent: 'center',
-                          borderRadius: 10,
+                          borderRadius: 50,
                           paddingVertical: 4,
                         }}>
                         <Text
                           style={{
                             color: 'green',
-                            fontSize: 15,
+                            fontSize: 12,
                             fontWeight: 'bold',
                           }}>
                           Signed
@@ -458,16 +469,16 @@ export default function DocumentDetail({navigation,route}) {
                           backgroundColor: 'rgba(0,3,0,0.3)',
                           borderColor: 'red',
                           borderWidth: 2,
-                          width: 150,
+                          width: 100,
                           alignItems: 'center',
                           justifyContent: 'center',
-                          borderRadius: 10,
+                          borderRadius: 50,
                           paddingVertical: 4,
                         }}>
                         <Text
                           style={{
                             color: 'red',
-                            fontSize: 15,
+                            fontSize: 12,
                             fontWeight: 'bold',
                           }}>
                           Not Signed
@@ -478,95 +489,102 @@ export default function DocumentDetail({navigation,route}) {
                 </View>
               );
             })}
-          <View
-            style={{
-              width: '100%',
-              padding: 15,
-              borderWidth: 1,
-              borderColor: 'orange',
-              borderRadius: 15,
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginTop: 20,
-            }}>
-            <Text
-              style={{
-                color: 'white',
-                fontSize: 16,
-                fontWeight: 'bold',
-                textAlign: 'center',
-              }}>
-              Please read the document carefully before signing
-            </Text>
-          </View>
-          {signers&& (
-            <GestureHandlerRootView>
-              <View
-                style={{
-                  width: '100%',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: 15,
-                  gap: 20,
-                }}>
-                <PanGestureHandler onGestureEvent={gestureHandler}>
-                  <Animated.View
+          {signers &&
+            !signers.filter(
+              item =>
+                item.user.toString() === phantomWalletPublicKey.toString(),
+            )[0].signed && (
+              <>
+                <View
+                  style={{
+                    width: '100%',
+                    padding: 15,
+                    borderWidth: 1,
+                    borderColor: 'orange',
+                    borderRadius: 15,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginTop: 20,
+                  }}>
+                  <Text
                     style={{
-                      width: 300,
-                      height: 65,
-                      backgroundColor: 'black',
-                      borderRadius: 5,
-                      padding: 5,
-                      flexDirection: 'row',
-                      elevation: 10,
+                      color: 'white',
+                      fontSize: 16,
+                      fontWeight: 'bold',
+                      textAlign: 'center',
                     }}>
-                    <Animated.View
-                      style={[
-                        {
+                    Please read the document carefully before signing
+                  </Text>
+                </View>
+
+                <GestureHandlerRootView>
+                  <View
+                    style={{
+                      width: '100%',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: 15,
+                      gap: 20,
+                    }}>
+                    <PanGestureHandler onGestureEvent={gestureHandler}>
+                      <Animated.View
+                        style={{
+                          width: 300,
+                          height: 65,
+                          backgroundColor: '#333',
                           borderRadius: 5,
-                          backgroundColor: '#d4ff0d',
-                          height: '100%',
-                          aspectRatio: 1,
-                          alignItems: 'center',
-                          justifyContent: 'center',
+                          padding: 5,
+                          flexDirection: 'row',
                           elevation: 10,
-                          zIndex: 2,
-                          transform: [{translateX}],
-                        },
-                      ]}>
-                      <ImageComponent
-                        source={require('../assets/next.png')}
-                        style={[{tintColor: 'white'}, animationstyle2]}
-                      />
-                      <ImageComponent
-                        source={require('../assets/tick.png')}
-                        style={[{tintColor: 'white'}, animationstyle]}
-                      />
-                    </Animated.View>
-                    <Animated.View
-                      style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        paddingLeft: 30,
-                      }}>
-                      <Animated.Text
-                        style={[
-                          {
-                            color: 'white',
-                            fontSize: 22,
-                            fontWeight: 'bold',
-                            opacity: 1,
-                          },
-                          animatedStyle3,
-                        ]}>
-                        Sign the document
-                      </Animated.Text>
-                    </Animated.View>
-                  </Animated.View>
-                </PanGestureHandler>
-              </View>
-            </GestureHandlerRootView>
-          )}
+                        }}>
+                        <Animated.View
+                          style={[
+                            {
+                              borderRadius: 5,
+                              backgroundColor: '#d4ff0d',
+                              height: '100%',
+                              aspectRatio: 1,
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              elevation: 10,
+                              zIndex: 2,
+                              transform: [{translateX}],
+                            },
+                          ]}>
+                          <ImageComponent
+                            source={require('../assets/next.png')}
+                            style={[{tintColor: 'white'}, animationstyle2]}
+                          />
+                          <ImageComponent
+                            source={require('../assets/tick.png')}
+                            style={[{tintColor: 'white'}, animationstyle]}
+                          />
+                        </Animated.View>
+                        <Animated.View
+                          style={{
+                            flex: 1,
+                            justifyContent: 'center',
+                            paddingLeft: 30,
+                          }}>
+                          <Animated.Text
+                            style={[
+                              {
+                                color: 'white',
+                                fontSize: 22,
+                                fontWeight: 'bold',
+                                opacity: 1,
+                              },
+                              animatedStyle3,
+                            ]}>
+                            Sign the document
+                          </Animated.Text>
+                        </Animated.View>
+                      </Animated.View>
+                    </PanGestureHandler>
+                  </View>
+                </GestureHandlerRootView>
+              </>
+            )}
           <View style={{height: 50}} />
         </View>
       </ScrollView>

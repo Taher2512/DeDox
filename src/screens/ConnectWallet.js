@@ -18,17 +18,22 @@ import UploadModal from '../components/UploadModal';
 import AddUser from '../components/AddUser';
 import usePhantomConnection from '../hooks/WalletContextProvider';
 import EnhancedDarkThemeBackground from './EnhancedDarkThemeBackground';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 export default function ConnectWallet() {
   const [balance, setBalance] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
-  const {connect,phantomWalletPublicKey} = usePhantomConnection();
-  const navigation=useNavigation()
+
+  const {connect, phantomWalletPublicKey} = usePhantomConnection();
+  const navigation = useNavigation();
+
   useEffect(() => {
-   if(phantomWalletPublicKey){
-    navigation.navigate('Home',{publicKey:phantomWalletPublicKey.toString()})
-   }
-  }, [phantomWalletPublicKey])
+    if (phantomWalletPublicKey) {
+      navigation.navigate('Home', {
+        publicKey: phantomWalletPublicKey.toString(),
+      });
+    }
+  }, [phantomWalletPublicKey]);
+
   const Children = ({}) => {
     return (
       <View style={styles.mainContainer}>
