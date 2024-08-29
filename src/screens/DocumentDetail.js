@@ -296,13 +296,16 @@ export default function DocumentDetail({navigation,route}) {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <TouchableOpacity
+           <View
+            style={{position:"absolute",zIndex:2,height:350,width:250,borderRadius:25,backgroundColor:'rgba(0,0,0,0.6)',justifyContent:'center',alignItems:'center'}}
+           >
+               <TouchableOpacity
               onPress={() => {
                 setvisible(true);
               }}
               style={{
                 position: 'absolute',
-                zIndex: 2,
+                zIndex: 3,
                 borderWidth: 1,
                 borderColor: 'white',
                 width: 200,
@@ -322,6 +325,7 @@ export default function DocumentDetail({navigation,route}) {
                 View Document
               </Text>
             </TouchableOpacity>
+           </View>
             <ImageBackground
               source={{uri: imageUrl}}
               resizeMode="cover"
@@ -330,7 +334,7 @@ export default function DocumentDetail({navigation,route}) {
                 width: 250,
                 borderRadius: 25,
                 overflow: 'hidden',
-                opacity: 0.4,
+                opacity:1,
               }}></ImageBackground>
           </View>
         )}
@@ -478,6 +482,8 @@ export default function DocumentDetail({navigation,route}) {
                 </View>
               );
             })}
+           {signers&&
+            !(signers.filter((item)=>item.user.toString()===phantomWalletPublicKey.toString())[0].signed)&&<>
           <View
             style={{
               width: '100%',
@@ -499,7 +505,7 @@ export default function DocumentDetail({navigation,route}) {
               Please read the document carefully before signing
             </Text>
           </View>
-          {signers&& (
+          
             <GestureHandlerRootView>
               <View
                 style={{
@@ -514,7 +520,7 @@ export default function DocumentDetail({navigation,route}) {
                     style={{
                       width: 300,
                       height: 65,
-                      backgroundColor: 'black',
+                      backgroundColor: '#333',
                       borderRadius: 5,
                       padding: 5,
                       flexDirection: 'row',
@@ -566,7 +572,7 @@ export default function DocumentDetail({navigation,route}) {
                 </PanGestureHandler>
               </View>
             </GestureHandlerRootView>
-          )}
+          </>}
           <View style={{height: 50}} />
         </View>
       </ScrollView>

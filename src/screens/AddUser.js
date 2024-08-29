@@ -84,7 +84,7 @@ export default function AddUser() {
           <View style={{flex:1,paddingTop:StatusBar.currentHeight+25,padding:20}}>
             <Searchbar value={text} onChangeText={settext} onSubmitEditing={handleSearch}  placeholder='Enter the public key' barTintColor={'white'}  style={{width:"100%",height:60}} textColor={'white'} onSearchButtonPress={()=>{console.log('pressed')}}  />
             <View style={{width:"100%",height:110,alignItems:'center',justifyContent:"center"}}>
-                {searchedUser&&<View style={{width:'100%',backgroundColor:'rgba(0,0,0,0.4)',height:90,alignItems:"center",justifyContent:'space-between',borderRadius:15,flexDirection:'row',padding:10}}>
+                {searchedUser&&<View style={{width:'100%',backgroundColor:'#33363d',height:90,alignItems:"center",justifyContent:'space-between',borderRadius:15,flexDirection:'row',padding:10}}>
                  <Image source={{uri:searchedUser.imageHash.toString()}} style={{height:'100%',aspectRatio:1,borderRadius:15,resizeMode:'stretch'}}/>
                  <View style={{width:'50%',height:'100%',justifyContent:"center"}}>
                  <Text style={{color:'white',fontSize:14,fontWeight:'bold',textAlign:'center'}}>Address : {searchedUser.user.toString().slice(0,5)+"..."+searchedUser.user.toString().slice(searchedUser.user.toString().length-4,searchedUser.user.toString().length)}</Text>
@@ -108,7 +108,7 @@ export default function AddUser() {
                  <Text style={{fontSize:22,fontWeight:'bold',color:'white'}}>Signers added</Text>
                  {users&&users.map((item,index)=>{
                      return(
-                         <View key={index} style={{width:'100%',height:80,alignItems:'center',justifyContent:'space-between',flexDirection:'row',backgroundColor:'rgba(0,0,0,0.4)',borderRadius:15,padding:10}}>
+                         <View key={index} style={{width:'100%',height:80,alignItems:'center',justifyContent:'space-between',flexDirection:'row',backgroundColor:'#33363d',borderRadius:15,padding:10}}>
                              <Image source={{uri:item.imageHash}} style={{height:'100%',aspectRatio:1,borderRadius:15,resizeMode:'stretch'}}/>
                              <View style={{width:'50%',height:'100%',justifyContent:"center"}}>
                              <Text style={{color:'white',fontSize:14,fontWeight:'bold',textAlign:'center'}}>Address : {item.user.toString().slice(0,5)+"..."+item.user.toString().slice(item.toString().length-4,item.toString().length)}</Text>

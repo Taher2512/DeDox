@@ -1,19 +1,27 @@
-/*eslint-disable*/
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import { View, StyleSheet, Dimensions } from 'react-native';
+import { LinearGradient } from 'react-native-linear-gradient';
+import Svg, { Defs, Rect, Pattern, Circle } from 'react-native-svg';
 
-const RefinedDarkBackground = ({ children }) => {
+const { width, height } = Dimensions.get('window');
+
+const EnhancedDarkThemeBackground = ({ children }) => {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#121212', '#1E1E1E', '#121212']}
-        style={StyleSheet.absoluteFillObject}
-        start={{x: 0, y: 0}}
-        end={{x: 1, y: 1}}
-      />
-      <View style={styles.vignette} />
-      {children}
+        colors={['black', 'black', 'black']}
+        style={styles.gradient}
+      >
+        <Svg height="100%" width="100%" style={StyleSheet.absoluteFillObject}>
+          <Defs>
+            <Pattern id="pattern" width="30" height="30" patternUnits="userSpaceOnUse">
+              <Circle cx="2" cy="2" r="1" fill="rgba(255, 255, 255, 0.3)" />
+            </Pattern>
+          </Defs>
+          <Rect width="100%" height="100%" fill="url(#pattern)" />
+        </Svg>
+        {children}
+      </LinearGradient>
     </View>
   );
 };
@@ -22,15 +30,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  vignette: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'transparent',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 150,
-    elevation: 8,
+  gradient: {
+    flex: 1,
+    width: width,
+    height: height,
   },
 });
 
-export default RefinedDarkBackground;
+export default EnhancedDarkThemeBackground;
