@@ -42,7 +42,6 @@ const UploadModal = ({visible, hideModal, onUpload, userWalletAddress}) => {
     updatedAddresses[index] = value;
     setWalletAddresses(updatedAddresses);
 
-    // Clear error when user starts typing
     const updatedErrors = [...addressErrors];
     updatedErrors[index] = '';
     setAddressErrors(updatedErrors);

@@ -204,7 +204,7 @@ export default function Home({route}) {
                 color: 'white',
                 marginLeft: 14,
               }}>
-              Uploading user data on blockchain...
+              Uploading user data on Solana...
             </Text>
           </View>
         )}

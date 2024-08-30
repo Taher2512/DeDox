@@ -9,7 +9,6 @@ import App from './App';
 import {name as appName} from './app.json';
 import {DefaultTheme, PaperProvider} from 'react-native-paper';
 
-// Mock event listener functions to prevent them from fataling.
 window.addEventListener = () => {};
 window.removeEventListener = () => {};
 window.Buffer = Buffer;

@@ -29,11 +29,11 @@ export default function AccountInfo({publicKey}) {
 
   useEffect(() => {
     fetchAndUpdateBalance();
-  }, [publicKey]); // Fetch balance when publicKey changes
+  }, [publicKey]);
 
   const handleRequestAirdrop = async () => {
     await requestAirdrop(publicKey);
-    fetchAndUpdateBalance(); // Fetch updated balance after airdrop
+    fetchAndUpdateBalance();
   };
 
   return (

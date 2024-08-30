@@ -52,7 +52,7 @@ export default function ConnectWallet() {
                     borderColor: 'white',
                     padding: 15,
                     alignItems: 'center',
-                    marginTop: -150,
+                    marginTop: -120,
                   }}>
                   <Text
                     style={{
@@ -63,34 +63,9 @@ export default function ConnectWallet() {
                     Connect
                   </Text>
                 </TouchableOpacity>
-                {/* <AddUser /> */}
               </View>
             </>
-
-            {/* {selectedAccount && (
-            <AccountInfo
-              selectedAccount={selectedAccount}
-              balance={balance}
-              fetchAndUpdateBalance={fetchAndUpdateBalance}
-            />
-          )} */}
           </ScrollView>
-          {/* {selectedAccount && (
-          <TouchableOpacity
-            activeOpacity={0.5}
-            style={styles.floatingButton}
-            onPress={showModal}>
-            <IconButton icon="plus" size={25} iconColor="#fff" />
-          </TouchableOpacity>
-        )} */}
-          {/* <UploadModal
-          visible={modalVisible}
-          hideModal={hideModal}
-          onUpload={handleUploadSuccess}
-          userWalletAddress={
-            selectedAccount ? selectedAccount.publicKey.toBase58() : ''
-          } */}
-          {/* /> */}
         </View>
       </View>
     );

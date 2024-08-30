@@ -98,11 +98,12 @@ export default function AddUser({route}) {
       }
     }
   };
+
   const remove = item => {
     const newUsers = users.filter(user => user.user.toString() != item);
     setusers(newUsers);
   };
-  // const Children = () => {
+
   return (
     <LinearGradient
       colors={['black', 'black', 'black']}
@@ -346,17 +347,24 @@ export default function AddUser({route}) {
               flexDirection: 'row-reverse',
             }}
             labelStyle={{fontSize: 17}}
-            onPress={() =>
-              navigation.navigate('UploadDoc', {imageUri, publicKey, users})
-            }>
+            onPress={() => {
+              const modifiedUsers = users.map(userObj => ({
+                ...userObj,
+                user: userObj.user.toString(),
+              }));
+
+              navigation.navigate('UploadDoc', {
+                imageUri,
+                publicKey,
+                users: modifiedUsers,
+              });
+            }}>
             Preview
           </Button>
         </View>
       </View>
     </LinearGradient>
   );
-  // };
-  // return <EnhancedDarkThemeBackground children={<Children />} />;
 }
 
 const styles = StyleSheet.create({

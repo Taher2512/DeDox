@@ -17,7 +17,6 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import UploadDoc from './src/screens/UploadDoc';
 import AddUser from './src/screens/AddUser';
 import AddImage from './src/screens/AddImage';
-// import AddUser from './src/components/AddUser';
 
 const Stack = createNativeStackNavigator();
 
@@ -26,8 +25,6 @@ export default function App() {
     <NavigationContainer>
       <WalletContextProvider>
         <StatusBar translucent backgroundColor={'transparent'} />
-        {/* <SafeAreaView style={styles.shell}> */}
-
         <Stack.Navigator
           screenOptions={{
             headerShown: false,

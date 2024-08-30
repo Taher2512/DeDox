@@ -140,7 +140,6 @@ export default function AddUser() {
       return;
     }
     try {
-      // ... (previous code remains the same)
       const pubKey = new PublicKey(phantomWalletPublicKey);
       const documentId = 1;
       console.log('Using public key:', pubKey.toString());
@@ -167,15 +166,10 @@ export default function AddUser() {
         customProvider,
       );
       const tx = await program.methods
-        .addDocument(
-          new BN(documentId),
-          imageHash,
-          new BN(Date.now()),
-          [
-            new PublicKey('AKmJpjSdYH2uhewVJWE7CucxGPzUTBw3ycL1qAbxxTDg'),
-            pubKey,
-          ], // Pass the array of PublicKey objects
-        )
+        .addDocument(new BN(documentId), imageHash, new BN(Date.now()), [
+          new PublicKey('AKmJpjSdYH2uhewVJWE7CucxGPzUTBw3ycL1qAbxxTDg'),
+          pubKey,
+        ])
         .accounts({
           document: documentPDA,
           user: pubKey,
@@ -198,7 +192,6 @@ export default function AddUser() {
           'Failed to sign or send transaction: ' + signError.message,
         );
       }
-      // ... (rest of the function remains the same)
     } catch (error) {
       console.error('Error preparing transaction:', error);
       Alert.alert('Error', 'Failed to prepare transaction: ' + error.message);
@@ -210,7 +203,6 @@ export default function AddUser() {
       return;
     }
     try {
-      // ... (previous code remains the same)
       const pubKey = new PublicKey(phantomWalletPublicKey);
       const documentId = 1;
       console.log('Using public key:', pubKey.toString());
@@ -231,11 +223,13 @@ export default function AddUser() {
         connection: CONNECTION,
       };
       console.log('reached here', pubKey);
+
       const program = new Program(
         idl,
         'Ch57PUCAvh6SCZ3DNroq7gXH9a1svdkykVabscVxdsEC',
         customProvider,
       );
+
       const tx = await program.methods
         .addSignedDocument(new BN(documentId), pubKey)
         .accounts({
@@ -246,9 +240,11 @@ export default function AddUser() {
         .instruction();
       transaction.add(tx);
       transaction.feePayer = pubKey;
+
       const {blockhash, lastValidBlockHeight} =
         await CONNECTION.getLatestBlockhash('confirmed');
       transaction.recentBlockhash = blockhash;
+
       try {
         const signedTransaction = await signAndSendTransaction(transaction);
         console.log('Signed transaction:', signedTransaction);
@@ -260,12 +256,12 @@ export default function AddUser() {
           'Failed to sign or send transaction: ' + signError.message,
         );
       }
-      // ... (rest of the function remains the same)
     } catch (error) {
       console.error('Error preparing transaction:', error);
       Alert.alert('Error', 'Failed to prepare transaction: ' + error.message);
     }
   };
+
   return (
     <View>
       <TouchableOpacity

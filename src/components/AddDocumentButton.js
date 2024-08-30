@@ -33,7 +33,6 @@ export default function AddDocumentButton({
       return;
     }
     try {
-      // ... (previous code remains the same)
       const pubKey = new PublicKey(phantomWalletPublicKey);
       console.log('Using public key:', pubKey.toString());
       const signerArray = signers.map(signer => new PublicKey(signer));
@@ -60,12 +59,7 @@ export default function AddDocumentButton({
         customProvider,
       );
       const tx = await program.methods
-        .addDocument(
-          new BN(docId),
-          imageHash,
-          new BN(Date.now()),
-          signerArray, // Pass the array of PublicKey objects
-        )
+        .addDocument(new BN(docId), imageHash, new BN(Date.now()), signerArray)
         .accounts({
           document: documentPDA,
           user: pubKey,
@@ -91,7 +85,6 @@ export default function AddDocumentButton({
           'Failed to sign or send transaction: ' + signError.message,
         );
       }
-      // ... (rest of the function remains the same)
     } catch (error) {
       console.error('Error preparing transaction:', error);
       Alert.alert('Error', 'Failed to prepare transaction: ' + error.message);

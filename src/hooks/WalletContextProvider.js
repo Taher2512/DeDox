@@ -23,7 +23,7 @@ import {
   SystemProgram,
   Transaction,
 } from '@solana/web3.js';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 
 const NETWORK = clusterApiUrl('devnet');
 
@@ -111,7 +111,6 @@ export const WalletContextProvider = ({children}) => {
     };
   }, []);
 
-  // handle inbound links
   useEffect(() => {
     if (!deepLink) {
       return;
@@ -120,14 +119,12 @@ export const WalletContextProvider = ({children}) => {
       setDeepLink(url);
     };
 
-    // Handle the initial URL that opened the app
     Linking.getInitialURL().then(url => {
       if (url) {
         setDeepLink(url);
       }
     });
 
-    // Listen for new URLs
     const subscription = Linking.addEventListener('url', handleDeepLink);
 
     console.log('deepLink', deepLink);
@@ -208,7 +205,6 @@ export const WalletContextProvider = ({children}) => {
       addLog(JSON.stringify(signMessageData, null, 2));
     }
     return () => {
-      // Clean up the event listener
       subscription.remove();
     };
   }, [deepLink]);
@@ -261,12 +257,11 @@ export const WalletContextProvider = ({children}) => {
     const url = buildUrl('disconnect', params);
     Linking.openURL(url);
 
-    // Clear the wallet state
     setPhantomWalletPublicKey(null);
     setSession(null);
     setSharedSecret(null);
     addLog('Disconnected!');
-    navigation.navigate('ConnectWallet'); // Adjust this based on your navigation setup
+    navigation.navigate('ConnectWallet');
   };
 
   const signAndSendTransaction = async transaction => {
@@ -450,7 +445,6 @@ export const WalletContextProvider = ({children}) => {
       addLog(`Airdrop failed: ${error.message}`);
     }
   };
-
 
   const fetchWalletBalance = async () => {
     if (!phantomWalletPublicKey) {

@@ -19,22 +19,6 @@ export function Header() {
           Secure, Decentralized Document Signing for a Trustless Future
         </Text>
       </View>
-      {/* <ImageBackground
-      accessibilityRole="image"
-      testID="new-app-screen-header"
-      source={require('../assets/backgrounds/background.png')}
-      style={[
-        styles.background,
-        {
-          backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-        },
-      ]}
-      imageStyle={styles.logo}>
-      <View>
-        <Text style={styles.title}>Solana</Text>
-        <Text style={styles.subtitle}>React Native</Text>
-      </View>
-    </ImageBackground> */}
     </>
   );
 }

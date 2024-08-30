@@ -108,7 +108,7 @@ const UploadDoc = ({route}) => {
         console.log('Image uploaded successfully:', response.data);
         console.log('IPFS Hash:', response.data.ipfsHash);
 
-        // Now proceed with blockchain upload
+        // Now proceed with Solana upload
         if (!phantomWalletPublicKey) {
           Alert.alert('Error', 'Wallet not connected');
           setUploading(false);
@@ -121,7 +121,7 @@ const UploadDoc = ({route}) => {
         const signerArray = walletAddresses.map(
           address => new PublicKey(address),
         );
-        const docId = Date.now(); // Use current timestamp as docId
+        const docId = Date.now();
         const [documentPDA, bump] = await PublicKey.findProgramAddress(
           [
             Buffer.from('document'),

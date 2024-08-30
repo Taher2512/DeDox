@@ -20,6 +20,8 @@ import {
 } from 'react-native-gesture-handler';
 import LinearGradient from 'react-native-linear-gradient';
 import Animated, {
+  Extrapolate,
+  interpolate,
   runOnJS,
   useAnimatedGestureHandler,
   useAnimatedStyle,
@@ -40,8 +42,13 @@ import {
 import {BN, Program} from '@project-serum/anchor';
 import idl from '../../contracts/idl/idl.json';
 import {Icon, IconButton} from 'react-native-paper';
+import {useNavigation} from '@react-navigation/native';
 
-export default function DocumentDetail({navigation, route}) {
+const BUTTON_WIDTH = 300;
+const BUTTON_HEIGHT = 65;
+const SLIDER_WIDTH = 65;
+
+export default function DocumentDetail({route}) {
   const [docId, setdocId] = useState(route.params.docId);
   const [signers, setsigners] = useState();
   const [uploader, setuploader] = useState('');
@@ -57,9 +64,9 @@ export default function DocumentDetail({navigation, route}) {
     connection: CONNECTION,
   };
   const program = new Program(idl, programId.toString(), customProvider);
+  const navigation = useNavigation();
 
   useEffect(() => {
-    // Fetch the document details from the blockchain
     fetchDocumentDetails();
   }, []);
 
@@ -69,9 +76,11 @@ export default function DocumentDetail({navigation, route}) {
         new PublicKey(route.params.uploader),
       );
       const uploaderData = await program.account.userPhoto.fetch(uploaderPDA);
+      console.log('Uploader data fetched:', uploaderData);
+
       setuploader({
         user: route.params.uploader,
-        imageUrl: imageURI + 'QmdYBWMaj1uHiYiMnq4CRi5dAX7d6pVGXCPGGfD8BY1HXV',
+        imageUrl: uploaderData.imageHash.toString(),
       });
 
       const signerArray = [];
@@ -99,7 +108,6 @@ export default function DocumentDetail({navigation, route}) {
             signed = true;
           } catch (docError) {
             console.log('Document not signed:', docError.message);
-            // Not throwing the error, just logging it
           }
 
           const signerInfo = {
@@ -110,11 +118,10 @@ export default function DocumentDetail({navigation, route}) {
           signerArray.push(signerInfo);
         } catch (signerError) {
           console.error('Error fetching signer data:', signerError.message);
-          // You might want to add some default or error state for this signer
           signerArray.push({
             signed: false,
             user: signers1[i].toString(),
-            imageUrl: 'default_image_url', // Use a default image URL
+            imageUrl: 'default_image_url',
             error: true,
           });
         }
@@ -124,7 +131,6 @@ export default function DocumentDetail({navigation, route}) {
       setsigners(signerArray);
     } catch (error) {
       console.error('Error in fetchDocumentDetails:', error);
-      // Handle the overall error, maybe set an error state or show an alert
     }
   };
 
@@ -134,7 +140,6 @@ export default function DocumentDetail({navigation, route}) {
       return;
     }
     try {
-      // ... (previous code remains the same)
       const pubKey = new PublicKey(phantomWalletPublicKey);
       const documentId = docId;
       console.log('Using public key:', pubKey.toString());
@@ -146,7 +151,6 @@ export default function DocumentDetail({navigation, route}) {
         ],
         new PublicKey(programId),
       );
-      // console.log("signed document PDA:", documentPDA.toString());
 
       const transaction = new Transaction();
       const customProvider = {
@@ -179,6 +183,7 @@ export default function DocumentDetail({navigation, route}) {
         const signedTransaction = await signAndSendTransaction(transaction);
         console.log('Signed transaction:', signedTransaction);
         Alert.alert('Success', 'Document signed successfully');
+        navigation.navigate('Home', {publicKey: pubKey.toString()});
       } catch (signError) {
         console.error('Error signing or sending transaction:', signError);
         Alert.alert(
@@ -203,26 +208,54 @@ export default function DocumentDetail({navigation, route}) {
     const v1 = useSharedValue(0);
     const v2 = useSharedValue(1);
     const translateX = useSharedValue(0);
+    const sliderWidth = Dimensions.get('screen').width;
 
     const gestureHandler = useAnimatedGestureHandler({
       onStart: (_, context) => {
         context.startX = translateX.value;
       },
       onActive: (event, context) => {
-        if (
-          context.startX + event.translationX >= 0 &&
-          context.startX + event.translationX < 300 - 65
-        ) {
-          translateX.value = context.startX + event.translationX;
-        }
+        translateX.value = Math.max(
+          0,
+          Math.min(
+            context.startX + event.translationX,
+            BUTTON_WIDTH - SLIDER_WIDTH,
+          ),
+        );
       },
       onEnd: () => {
-        if (translateX.value > 300 - 68) {
+        if (translateX.value > BUTTON_WIDTH - SLIDER_WIDTH - 150) {
+          translateX.value = withSpring(BUTTON_WIDTH - SLIDER_WIDTH - 150);
           runOnJS(signDocument)();
         } else {
           translateX.value = withSpring(0);
         }
       },
+    });
+
+    const sliderStyle = useAnimatedStyle(() => ({
+      transform: [{translateX: translateX.value}],
+    }));
+
+    const textOpacity = useAnimatedStyle(() => ({
+      opacity: interpolate(
+        translateX.value,
+        [0, BUTTON_WIDTH - SLIDER_WIDTH],
+        [1, 0],
+        Extrapolate.CLAMP,
+      ),
+    }));
+
+    const iconStyle = useAnimatedStyle(() => {
+      const rotate = interpolate(
+        translateX.value,
+        [0, BUTTON_WIDTH - SLIDER_WIDTH],
+        [0, 360],
+        Extrapolate.CLAMP,
+      );
+      return {
+        transform: [{rotate: `${rotate}deg`}],
+      };
     });
 
     const animationstyle = useAnimatedStyle(() => {
@@ -238,6 +271,7 @@ export default function DocumentDetail({navigation, route}) {
             : withTiming(0, {duration: 500}),
       };
     });
+
     const animationstyle2 = useAnimatedStyle(() => {
       return {
         transform: [{rotate: `${v1.value}deg`}],
@@ -251,6 +285,7 @@ export default function DocumentDetail({navigation, route}) {
             : withTiming(28, {duration: 500}),
       };
     });
+
     const animatedStyle3 = useAnimatedStyle(() => {
       return {
         opacity: v2.value,
@@ -519,66 +554,58 @@ export default function DocumentDetail({navigation, route}) {
                 </View>
 
                 <GestureHandlerRootView>
-                  <View
-                    style={{
-                      width: '100%',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: 15,
-                      gap: 20,
-                    }}>
+                  <View style={{padding: 15, alignItems: 'center'}}>
                     <PanGestureHandler onGestureEvent={gestureHandler}>
                       <Animated.View
                         style={{
-                          width: 300,
-                          height: 65,
+                          width: BUTTON_WIDTH,
+                          height: BUTTON_HEIGHT,
                           backgroundColor: '#333',
                           borderRadius: 5,
                           padding: 5,
                           flexDirection: 'row',
-                          elevation: 10,
+                          alignItems: 'center',
+                          marginBottom: 50,
                         }}>
                         <Animated.View
                           style={[
                             {
+                              width: SLIDER_WIDTH,
+                              height: SLIDER_WIDTH,
                               borderRadius: 5,
                               backgroundColor: '#d4ff0d',
-                              height: '100%',
-                              aspectRatio: 1,
-                              alignItems: 'center',
                               justifyContent: 'center',
-                              elevation: 10,
-                              zIndex: 2,
-                              transform: [{translateX}],
+                              alignItems: 'center',
                             },
+                            sliderStyle,
                           ]}>
-                          <ImageComponent
+                          <Animated.Image
                             source={require('../assets/next.png')}
-                            style={[{tintColor: 'white'}, animationstyle2]}
-                          />
-                          <ImageComponent
-                            source={require('../assets/tick.png')}
-                            style={[{tintColor: 'white'}, animationstyle]}
+                            style={[
+                              {width: 28, height: 28, tintColor: 'white'},
+                              iconStyle,
+                            ]}
                           />
                         </Animated.View>
                         <Animated.View
-                          style={{
-                            flex: 1,
-                            justifyContent: 'center',
-                            paddingLeft: 30,
-                          }}>
-                          <Animated.Text
-                            style={[
-                              {
-                                color: 'white',
-                                fontSize: 22,
-                                fontWeight: 'bold',
-                                opacity: 1,
-                              },
-                              animatedStyle3,
-                            ]}>
+                          style={[
+                            {
+                              position: 'absolute',
+                              left: SLIDER_WIDTH,
+                              right: 0,
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                            },
+                            textOpacity,
+                          ]}>
+                          <Text
+                            style={{
+                              color: 'white',
+                              fontSize: 18,
+                              fontWeight: 'bold',
+                            }}>
                             Sign the document
-                          </Animated.Text>
+                          </Text>
                         </Animated.View>
                       </Animated.View>
                     </PanGestureHandler>
