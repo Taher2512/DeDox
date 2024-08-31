@@ -5,6 +5,7 @@
 - [Features](#features)
 - [How It Works](#how-it-works)
 - [Demo](#demo)
+- [DeDox APK](#dedox-apk)
 - [Technologies Used](#technologies-used)
 - [Contact](#contact)
 - [Acknowledgements](#acknowledgements)
