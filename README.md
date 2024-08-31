@@ -49,6 +49,12 @@ This demo video shows:
 - The signing process using the slider
 - Viewing the updated document status after signing
 
+## DeDox APK
+
+**Note:-** You need to have a Phantom Wallet Account and some test SOL tokens in it in order to get started with our app.
+
+APK Link - https://drive.google.com/file/d/18rY3LljmXYNrYVfrcKHdrrAbaVgoZJR4/view?usp=sharing
+
 ## Technologies Used
 
 - [Solana](https://solana.com/) - Blockchain platform
