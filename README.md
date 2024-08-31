@@ -1,79 +1,69 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# DeDox: Decentralized Document Storage and Signing on Solana
 
-# Getting Started
+## Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [How It Works](#how-it-works)
+- [Demo](#demo)
+- [Technologies Used](#technologies-used)
+- [Contact](#contact)
+- [Acknowledgements](#acknowledgements)
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+## Overview
 
-## Step 1: Start the Metro Server
+DeDox is an innovative decentralized application (dApp) built on the Solana blockchain, designed to revolutionize document storage, verification, and signing processes. By leveraging blockchain technology, DeDox ensures the immutability and security of important documents while providing a seamless signing experience.
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
+## Features
 
-To start Metro, run the following command from the _root_ of your React Native project:
+- ✅ **Blockchain-Based Document Storage**: Securely store critical documents on the Solana blockchain.
+- 🖋️ **Decentralized Signing System**: Specify signers using their wallet addresses for easy document access and signing.
+- 🔒 **Blockchain-Verified Signatures**: All signatures are recorded on the Solana blockchain, creating an unalterable proof of signing.
+- 🤳 **Identity Verification**: Basic KYC process using selfies stored on IPFS with hashes recorded on Solana.
+- 🖥️ **User-Friendly Interface**: Intuitive slider mechanism for signing and comprehensive document information display.
 
-```bash
-# using npm
-npm start
+## How It Works
 
-# OR using Yarn
-yarn start
-```
+1. **Document Upload**: Users upload important documents to the blockchain via DeDox.
+2. **Signer Designation**: During upload, the document owner specifies signers using their Solana wallet addresses.
+3. **Notification**: Designated signers see the document in their DeDox app when logged in with the specified wallet address.
+4. **Signing Process**: Signers use a simple slider button to sign the document, recording their signature on the blockchain.
+5. **Verification**: The app displays signing status, including the number of signatures, signers' photos, and the document image.
 
-## Step 2: Start your Application
+## Demo
 
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
+### Uploader's Perspective
 
-### For Android
+[![Uploader Demo](https://drive.google.com/thumbnail?id=116MlVJtlGZKouG-8unk1lYvuB8XXWQBu)](https://drive.google.com/file/d/116MlVJtlGZKouG-8unk1lYvuB8XXWQBu/view?usp=sharing)
 
-```bash
-# using npm
-npm run android
+This demo video shows:
+- How to upload a document
+- Designating signers
+- Viewing the uploaded document and its status
 
-# OR using Yarn
-yarn android
-```
+### Signer's Perspective
 
-### For iOS
+[![Signer Demo](https://drive.google.com/thumbnail?id=16no5UWvLf1gxn_9zamTVuWceRvCapqE0)](https://drive.google.com/file/d/16no5UWvLf1gxn_9zamTVuWceRvCapqE0/view?usp=sharing)
 
-```bash
-# using npm
-npm run ios
+This demo video shows:
+- Accessing a document shared for signing
+- The signing process using the slider
+- Viewing the updated document status after signing
 
-# OR using Yarn
-yarn ios
-```
+## Technologies Used
 
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
+- [Solana](https://solana.com/) - Blockchain platform
+- [Solana React Native SDK](https://docs.solanamobile.com/react-native/overview) - Front-end framework
+- [IPFS](https://ipfs.io/) - Distributed file system
 
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
+## Contact
 
-## Step 3: Modifying your App
+This project has been built by:
 
-Now that you have successfully run the app, let's modify it.
+Taher Khasamwala - taherabbkhasamwala@gmail.com
 
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
+Mustafa Chaiwala - mustafachaiwala2003@gmail.com
 
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
+## Acknowledgements
 
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+- [Solana Foundation](https://solana.com/)
+- [IPFS](https://ipfs.io/)
