@@ -4,9 +4,8 @@ import EnhancedDarkThemeBackground from './EnhancedDarkThemeBackground';
 
 import { Image, StatusBar,Text,TouchableOpacity,View } from 'react-native'
 import { ActivityIndicator, Searchbar } from 'react-native-paper';
-import { CONNECTION, getUserPDA, imageURI } from '../components/constants';
+import { CONNECTION, getUserPDA } from '../components/constants';
 import usePhantomConnection from '../hooks/WalletContextProvider';
-import { hex } from '@project-serum/anchor/dist/cjs/utils/bytes';
 import { Program } from '@project-serum/anchor';
 import idl from "../../contracts/idl/idl.json"
 import { PublicKey } from '@solana/web3.js';
